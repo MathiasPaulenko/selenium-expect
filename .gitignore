@@ -40,3 +40,6 @@ Thumbs.db
 ref/
 screenshots/
 tests/integration/test_page.html
+
+# AI assistant context
+AGENTS.md
