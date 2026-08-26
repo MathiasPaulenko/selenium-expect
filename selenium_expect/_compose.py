@@ -15,15 +15,17 @@ from selenium_expect._errors import AssertionFormatter
 def satisfy_all(
     target: Any,
     *conditions: Callable[[Any], None],
-    timeout: float | None = None,
-    polling: float | list[float] | None = None,
     message: str | None = None,
 ) -> None:
     """Assert all conditions pass (AND logic).
 
     Each condition is a callable that receives *target* and may raise
     ``AssertionError`` on failure. All must pass without raising.
+
+    Each condition is responsible for its own retry/timeout via ``expect()``.
     """
+    if not conditions:
+        raise ValueError("satisfy_all requires at least one condition")
     failures: list[str] = []
     for i, cond in enumerate(conditions):
         try:
@@ -48,15 +50,17 @@ def satisfy_all(
 def satisfy_any(
     target: Any,
     *conditions: Callable[[Any], None],
-    timeout: float | None = None,
-    polling: float | list[float] | None = None,
     message: str | None = None,
 ) -> None:
     """Assert at least one condition passes (OR logic).
 
     Each condition is a callable that receives *target* and may raise
     ``AssertionError`` on failure. At least one must pass without raising.
+
+    Each condition is responsible for its own retry/timeout via ``expect()``.
     """
+    if not conditions:
+        raise ValueError("satisfy_any requires at least one condition")
     failures: list[str] = []
     for i, cond in enumerate(conditions):
         try:
@@ -81,15 +85,17 @@ def satisfy_any(
 def satisfy_none(
     target: Any,
     *conditions: Callable[[Any], None],
-    timeout: float | None = None,
-    polling: float | list[float] | None = None,
     message: str | None = None,
 ) -> None:
     """Assert no condition passes (NOT logic).
 
     Each condition is a callable that receives *target* and may raise
     ``AssertionError``. All must raise (i.e. none pass).
+
+    Each condition is responsible for its own retry/timeout via ``expect()``.
     """
+    if not conditions:
+        raise ValueError("satisfy_none requires at least one condition")
     passed: list[int] = []
     for i, cond in enumerate(conditions):
         try:

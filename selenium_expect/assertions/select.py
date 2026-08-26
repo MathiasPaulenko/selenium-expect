@@ -100,6 +100,8 @@ class ExpectSelect(AssertionMixin):
         polling: float | list[float] | None = None,
     ) -> None:
         """Assert [opt.get_attribute('value') for opt in all_selected_options] == values."""
+        if not values:
+            raise ValueError("values list must not be empty")
         select = self._target
 
         def condition() -> tuple[bool, Any]:
@@ -123,6 +125,8 @@ class ExpectSelect(AssertionMixin):
         polling: float | list[float] | None = None,
     ) -> None:
         """Assert [opt.text for opt in all_selected_options] == texts."""
+        if not texts:
+            raise ValueError("texts list must not be empty")
         select = self._target
 
         def condition() -> tuple[bool, Any]:
@@ -219,7 +223,7 @@ class ExpectSelect(AssertionMixin):
         select = self._target
 
         def condition() -> tuple[bool, Any]:
-            if index >= len(select.options):
+            if index >= len(select.options) or index < -len(select.options):
                 return (False, f"index {index} out of range")
             actual = select.options[index].text
             return (actual == text, actual)
@@ -318,6 +322,53 @@ class ExpectSelect(AssertionMixin):
             condition=condition,
             condition_name="to be single select",
             expected=False,
+            entity="select",
+            timeout=timeout,
+            polling=polling,
+        )
+
+    def to_have_selected_index(
+        self,
+        index: int,
+        *,
+        timeout: float | None = None,
+        polling: float | list[float] | None = None,
+    ) -> None:
+        """Assert select.options[index].is_selected() == True."""
+        select = self._target
+
+        def condition() -> tuple[bool, Any]:
+            if index >= len(select.options) or index < -len(select.options):
+                return (False, f"index {index} out of range")
+            actual = select.options[index].is_selected()
+            return (actual is True, actual)
+
+        self._run_assertion(
+            condition=condition,
+            condition_name=f"to have selected index {index}",
+            expected=True,
+            entity="select",
+            timeout=timeout,
+            polling=polling,
+        )
+
+    def to_have_no_selection(
+        self,
+        *,
+        timeout: float | None = None,
+        polling: float | list[float] | None = None,
+    ) -> None:
+        """Assert select.all_selected_options is empty."""
+        select = self._target
+
+        def condition() -> tuple[bool, Any]:
+            actual = len(select.all_selected_options)
+            return (actual == 0, actual)
+
+        self._run_assertion(
+            condition=condition,
+            condition_name="to have no selection",
+            expected=0,
             entity="select",
             timeout=timeout,
             polling=polling,

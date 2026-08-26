@@ -11,7 +11,13 @@ import re
 from collections.abc import Callable
 from typing import Any
 
-from selenium_expect._config import ExpectConfig, get_config
+from selenium_expect._config import (
+    ExpectConfig,
+    get_config,
+)
+from selenium_expect._config import (
+    normalize_timeout as _normalize_timeout,
+)
 from selenium_expect._errors import AssertionFormatter
 from selenium_expect._retry import retry_until
 
@@ -28,16 +34,26 @@ class PollAssertion:
     ) -> None:
         self._fn = fn
         self._config = config if config is not None else get_config()
-        self._timeout = timeout if timeout is not None else self._config.timeout
+        self._timeout = _normalize_timeout(timeout) if timeout is not None else self._config.timeout
+        if self._timeout < 0:
+            raise ValueError(f"timeout must be >= 0, got {self._timeout}")
         if polling is None:
             self._polling_interval = self._config.polling_interval
             self._polling_intervals = self._config.polling_intervals
         elif isinstance(polling, list):
+            if len(polling) == 0:
+                raise ValueError("polling list must not be empty; use a float for fixed interval")
             self._polling_interval = 0.5
             self._polling_intervals = polling
         else:
             self._polling_interval = polling
             self._polling_intervals = None
+        if self._polling_interval < 0:
+            raise ValueError(f"polling interval must be >= 0, got {self._polling_interval}")
+        if self._polling_intervals is not None:
+            for i, interval in enumerate(self._polling_intervals):
+                if interval < 0:
+                    raise ValueError(f"polling_intervals[{i}] must be >= 0, got {interval}")
 
     def _run(
         self,
@@ -118,7 +134,12 @@ class PollAssertion:
 
         def condition() -> tuple[bool, Any]:
             actual = fn()
-            return (expected in (actual or ""), actual)
+            if actual is None:
+                return (False, actual)
+            try:
+                return (expected in actual, actual)
+            except TypeError:
+                return (False, f"not iterable: {actual!r}")
 
         self._run(condition, f"to contain {expected!r}", expected)
 
@@ -138,7 +159,10 @@ class PollAssertion:
 
         def condition() -> tuple[bool, Any]:
             actual = fn()
-            return (actual > expected, actual)
+            try:
+                return (actual > expected, actual)
+            except TypeError:
+                return (False, f"not comparable: {actual!r} > {expected!r}")
 
         self._run(condition, f"to be greater than {expected}", expected)
 
@@ -148,7 +172,10 @@ class PollAssertion:
 
         def condition() -> tuple[bool, Any]:
             actual = fn()
-            return (actual < expected, actual)
+            try:
+                return (actual < expected, actual)
+            except TypeError:
+                return (False, f"not comparable: {actual!r} < {expected!r}")
 
         self._run(condition, f"to be less than {expected}", expected)
 
@@ -188,7 +215,7 @@ def poll(
 
     Usage::
 
-        expect.poll(lambda: driver.execute_script("return document.readyState"))
+        poll(lambda: driver.execute_script("return document.readyState"))
             .to_equal("complete")
     """
     return PollAssertion(fn, timeout=timeout, polling=polling, config=config)

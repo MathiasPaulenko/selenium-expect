@@ -7,6 +7,17 @@ from dataclasses import replace as _replace
 from typing import Any
 
 
+def normalize_timeout(timeout: float) -> float:
+    """Convert timeout to seconds.
+
+    If *timeout* is an int >= 1000, it is interpreted as milliseconds.
+    Floats and ints < 1000 are treated as seconds.
+    """
+    if isinstance(timeout, int) and timeout >= 1000:
+        return timeout / 1000.0
+    return float(timeout)
+
+
 @dataclass(frozen=True, slots=True)
 class ExpectConfig:
     """Immutable configuration for expect assertions.
@@ -29,6 +40,8 @@ class ExpectConfig:
         if self.polling_interval < 0:
             raise ValueError(f"polling_interval must be >= 0, got {self.polling_interval}")
         if self.polling_intervals is not None:
+            if len(self.polling_intervals) == 0:
+                raise ValueError("polling_intervals must not be empty; use None for fixed interval")
             for i, interval in enumerate(self.polling_intervals):
                 if interval < 0:
                     raise ValueError(f"polling_intervals[{i}] must be >= 0, got {interval}")
@@ -42,9 +55,13 @@ _global_config: ExpectConfig = ExpectConfig()
 
 
 def set_default_timeout(seconds: float) -> None:
-    """Set the default timeout for all expect assertions."""
+    """Set the default timeout for all expect assertions.
+
+    If *seconds* is an int >= 1000, it is interpreted as milliseconds
+    (consistent with ``expect(timeout=...)``).
+    """
     global _global_config
-    _global_config = _global_config.replace(timeout=seconds)
+    _global_config = _global_config.replace(timeout=normalize_timeout(seconds))
 
 
 def set_default_polling_interval(seconds: float) -> None:

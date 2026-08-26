@@ -116,16 +116,67 @@ class ExpectIframe(AssertionMixin):
             try:
                 driver.switch_to.frame(frame_id)
                 source = driver.page_source
-                driver.switch_to.default_content()
                 return (text in (source or ""), len(source) if source else 0)
             except NoSuchFrameException:
-                driver.switch_to.default_content()
                 return (False, "frame not available")
+            finally:
+                driver.switch_to.default_content()
 
         self._run_assertion(
             condition=condition,
             condition_name=f"to have frame {frame_id!r} text containing {text!r}",
             expected=text,
+            entity="iframe",
+            timeout=timeout,
+            polling=polling,
+        )
+
+    def to_be_in_frame(
+        self,
+        frame_id: str | int,
+        *,
+        timeout: float | None = None,
+        polling: float | list[float] | None = None,
+    ) -> None:
+        """Assert driver is currently in the given frame (switch_to.frame succeeds)."""
+        driver = self._target
+
+        def condition() -> tuple[bool, Any]:
+            try:
+                driver.switch_to.frame(frame_id)
+                return (True, "in frame")
+            except NoSuchFrameException:
+                return (False, "not in frame")
+
+        self._run_assertion(
+            condition=condition,
+            condition_name=f"to be in frame {frame_id!r}",
+            expected="in frame",
+            entity="iframe",
+            timeout=timeout,
+            polling=polling,
+        )
+
+    def to_be_in_default_content(
+        self,
+        *,
+        timeout: float | None = None,
+        polling: float | list[float] | None = None,
+    ) -> None:
+        """Assert driver is in default content (not in any frame)."""
+        driver = self._target
+
+        def condition() -> tuple[bool, Any]:
+            try:
+                driver.switch_to.default_content()
+                return (True, "in default content")
+            except Exception as exc:
+                return (False, str(exc))
+
+        self._run_assertion(
+            condition=condition,
+            condition_name="to be in default content",
+            expected="in default content",
             entity="iframe",
             timeout=timeout,
             polling=polling,

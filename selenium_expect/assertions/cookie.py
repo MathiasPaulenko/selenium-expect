@@ -272,6 +272,33 @@ class ExpectCookie(AssertionMixin):
             polling=polling,
         )
 
+    def to_have_cookie_expiry(
+        self,
+        name: str,
+        expiry: int,
+        *,
+        timeout: float | None = None,
+        polling: float | list[float] | None = None,
+    ) -> None:
+        """Assert driver.get_cookie(name)['expiry'] == expiry."""
+        driver = self._target
+
+        def condition() -> tuple[bool, Any]:
+            cookie = driver.get_cookie(name)
+            if cookie is None:
+                return (False, "cookie not found")
+            actual = cookie.get("expiry")
+            return (actual == expiry, actual)
+
+        self._run_assertion(
+            condition=condition,
+            condition_name=f"to have cookie {name!r} expiry {expiry}",
+            expected=expiry,
+            entity="cookies",
+            timeout=timeout,
+            polling=polling,
+        )
+
     def to_have_no_cookies(
         self,
         *,

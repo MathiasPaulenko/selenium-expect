@@ -12,13 +12,11 @@ from selenium_expect._config import (
     set_screenshot_on_failure,
 )
 from selenium_expect._expect import expect
-from selenium_expect._matcher import extend
+from selenium_expect._matcher import extend, merge_expects
 from selenium_expect._poll import poll
 from selenium_expect._soft import SoftAssertionCollector, assert_all
 
 __version__ = "0.1.0"
-
-expect.poll = poll  # type: ignore[attr-defined]
 
 __all__: list[str] = [
     "ExpectConfig",
@@ -27,6 +25,7 @@ __all__: list[str] = [
     "expect",
     "extend",
     "get_config",
+    "merge_expects",
     "poll",
     "set_debug_mode",
     "set_default_polling_interval",

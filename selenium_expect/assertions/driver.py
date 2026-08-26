@@ -175,6 +175,54 @@ class ExpectDriver(ExpectCookie, ExpectJS, ExpectIframe, ExpectWindow, Assertion
             polling=polling,
         )
 
+    def to_have_url_changes(
+        self,
+        url: str,
+        *,
+        timeout: float | None = None,
+        polling: float | list[float] | None = None,
+    ) -> None:
+        """Assert driver.current_url != url (URL has changed from the given value)."""
+        driver = self._target
+
+        def condition() -> tuple[bool, Any]:
+            actual = driver.current_url
+            return (actual != url, actual)
+
+        self._run_assertion(
+            condition=condition,
+            condition_name=f"to have URL changed from {url!r}",
+            expected=f"!= {url!r}",
+            entity="page",
+            timeout=timeout,
+            polling=polling,
+        )
+
+    # --- Ready state ---
+
+    def to_have_ready_state(
+        self,
+        state: str,
+        *,
+        timeout: float | None = None,
+        polling: float | list[float] | None = None,
+    ) -> None:
+        """Assert document.readyState == state (e.g. 'complete', 'interactive', 'loading')."""
+        driver = self._target
+
+        def condition() -> tuple[bool, Any]:
+            actual = driver.execute_script("return document.readyState;")
+            return (actual == state, actual)
+
+        self._run_assertion(
+            condition=condition,
+            condition_name=f"to have ready state {state!r}",
+            expected=state,
+            entity="page",
+            timeout=timeout,
+            polling=polling,
+        )
+
     # --- Windows / tabs ---
 
     def to_have_window_count(
@@ -269,6 +317,30 @@ class ExpectDriver(ExpectCookie, ExpectJS, ExpectIframe, ExpectWindow, Assertion
             polling=polling,
         )
 
+    def to_have_new_window_opened(
+        self,
+        previous_handles: list[str],
+        *,
+        timeout: float | None = None,
+        polling: float | list[float] | None = None,
+    ) -> None:
+        """Assert that a new window has opened (current handles > previous handles)."""
+        driver = self._target
+
+        def condition() -> tuple[bool, Any]:
+            current = driver.window_handles
+            new_handles = [h for h in current if h not in previous_handles]
+            return (len(new_handles) > 0, new_handles)
+
+        self._run_assertion(
+            condition=condition,
+            condition_name="to have new window opened",
+            expected="new handle",
+            entity="browser",
+            timeout=timeout,
+            polling=polling,
+        )
+
     # --- Browser / capabilities ---
 
     def to_have_browser_name(
@@ -356,7 +428,9 @@ class ExpectDriver(ExpectCookie, ExpectJS, ExpectIframe, ExpectWindow, Assertion
         def condition() -> tuple[bool, Any]:
             caps = driver.capabilities
             actual = caps.get(key) if caps else None
-            return (value in (actual or ""), actual)
+            if actual is None:
+                return (False, actual)
+            return (value in str(actual), actual)
 
         self._run_assertion(
             condition=condition,
@@ -583,7 +657,8 @@ class ExpectDriver(ExpectCookie, ExpectJS, ExpectIframe, ExpectWindow, Assertion
 
         def condition() -> tuple[bool, Any]:
             actual = driver.switch_to.active_element.get_attribute("class")
-            return (class_name in (actual or ""), actual)
+            classes = (actual or "").split()
+            return (class_name in classes, actual)
 
         self._run_assertion(
             condition=condition,

@@ -15,9 +15,11 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from selenium.common.exceptions import (
+    ElementNotInteractableException,
     NoAlertPresentException,
     NoSuchElementException,
     NoSuchFrameException,
+    NoSuchShadowRootException,
     NoSuchWindowException,
     StaleElementReferenceException,
 )
@@ -30,6 +32,8 @@ RETRYABLE_EXCEPTIONS: tuple[type[Exception], ...] = (
     NoAlertPresentException,
     NoSuchWindowException,
     NoSuchFrameException,
+    ElementNotInteractableException,
+    NoSuchShadowRootException,
 )
 
 
@@ -70,17 +74,13 @@ def retry_until(
     actual_value: Any = None
 
     def _get_interval(idx: int) -> float:
-        if polling_intervals is None:
+        if polling_intervals is None or len(polling_intervals) == 0:
             return polling_interval
         if idx < len(polling_intervals):
             return polling_intervals[idx]
         return polling_intervals[-1]
 
     while True:
-        elapsed = time.monotonic() - start
-        if elapsed >= timeout:
-            break
-
         poll_count += 1
         try:
             passed, actual_value = condition()
@@ -95,6 +95,9 @@ def retry_until(
                     (time.monotonic() - start) * 1000,
                 )
             timeline.append({"poll": poll_count, "passed": False, "actual": str(actual_value)})
+            elapsed = time.monotonic() - start
+            if elapsed >= timeout:
+                break
             _sleep_and_check_timeout(start, timeout, _get_interval(poll_count - 1))
             continue
 
@@ -117,6 +120,10 @@ def retry_until(
                 poll_count=poll_count,
                 timeline=timeline,
             )
+
+        elapsed = time.monotonic() - start
+        if elapsed >= timeout:
+            break
 
         _sleep_and_check_timeout(start, timeout, _get_interval(poll_count - 1))
 

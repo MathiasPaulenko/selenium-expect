@@ -66,7 +66,12 @@ class ExpectJS(AssertionMixin):
 
         def condition() -> tuple[bool, Any]:
             actual = driver.execute_script(script)
-            return (expected in (actual or ""), actual)
+            if actual is None:
+                return (False, actual)
+            try:
+                return (expected in actual, actual)
+            except TypeError:
+                return (False, f"not iterable: {actual!r}")
 
         self._run_assertion(
             condition=condition,
@@ -139,7 +144,7 @@ class ExpectJS(AssertionMixin):
         driver = self._target
 
         def condition() -> tuple[bool, Any]:
-            actual = driver.execute_script(f"return localStorage.getItem('{key}');")
+            actual = driver.execute_script("return localStorage.getItem(arguments[0]);", key)
             return (actual == value, actual)
 
         self._run_assertion(
@@ -162,7 +167,7 @@ class ExpectJS(AssertionMixin):
         driver = self._target
 
         def condition() -> tuple[bool, Any]:
-            actual = driver.execute_script(f"return localStorage.getItem('{key}');")
+            actual = driver.execute_script("return localStorage.getItem(arguments[0]);", key)
             return (actual is not None, actual)
 
         self._run_assertion(
@@ -185,7 +190,7 @@ class ExpectJS(AssertionMixin):
         driver = self._target
 
         def condition() -> tuple[bool, Any]:
-            actual = driver.execute_script(f"return localStorage.getItem('{key}');")
+            actual = driver.execute_script("return localStorage.getItem(arguments[0]);", key)
             return (actual is None, actual)
 
         self._run_assertion(
@@ -234,7 +239,7 @@ class ExpectJS(AssertionMixin):
         driver = self._target
 
         def condition() -> tuple[bool, Any]:
-            actual = driver.execute_script(f"return sessionStorage.getItem('{key}');")
+            actual = driver.execute_script("return sessionStorage.getItem(arguments[0]);", key)
             return (actual == value, actual)
 
         self._run_assertion(
@@ -257,7 +262,7 @@ class ExpectJS(AssertionMixin):
         driver = self._target
 
         def condition() -> tuple[bool, Any]:
-            actual = driver.execute_script(f"return sessionStorage.getItem('{key}');")
+            actual = driver.execute_script("return sessionStorage.getItem(arguments[0]);", key)
             return (actual is not None, actual)
 
         self._run_assertion(
@@ -280,7 +285,7 @@ class ExpectJS(AssertionMixin):
         driver = self._target
 
         def condition() -> tuple[bool, Any]:
-            actual = driver.execute_script(f"return sessionStorage.getItem('{key}');")
+            actual = driver.execute_script("return sessionStorage.getItem(arguments[0]);", key)
             return (actual is None, actual)
 
         self._run_assertion(
@@ -310,6 +315,30 @@ class ExpectJS(AssertionMixin):
             condition=condition,
             condition_name=f"to have sessionStorage length {length}",
             expected=length,
+            entity="js",
+            timeout=timeout,
+            polling=polling,
+        )
+
+    def to_have_js_variable(
+        self,
+        name: str,
+        value: Any,
+        *,
+        timeout: float | None = None,
+        polling: float | list[float] | None = None,
+    ) -> None:
+        """Assert driver.execute_script('return window[name]') == value."""
+        driver = self._target
+
+        def condition() -> tuple[bool, Any]:
+            actual = driver.execute_script("return window[arguments[0]];", name)
+            return (actual == value, actual)
+
+        self._run_assertion(
+            condition=condition,
+            condition_name=f"to have JS variable {name!r}={value!r}",
+            expected=value,
             entity="js",
             timeout=timeout,
             polling=polling,

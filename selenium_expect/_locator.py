@@ -72,7 +72,7 @@ class LocatorExpect(AssertionMixin):
             return None
 
     def __getattr__(self, name: str) -> Any:
-        """Delegate to ExpectElement methods with re-find on each poll.
+        """Delegate to ExpectElement methods or custom matchers with re-find on each poll.
 
         For each assertion method call, we wrap the condition so that
         ``find_element`` is called fresh on every retry poll.
@@ -81,12 +81,44 @@ class LocatorExpect(AssertionMixin):
         if name.startswith("_"):
             raise AttributeError(f"{type(self).__name__!r} object has no attribute {name!r}")
 
+        from selenium_expect._matcher import CustomMatcherRegistry
         from selenium_expect.assertions.element import ExpectElement
+
+        # Check for custom matcher first
+        matcher_fn = CustomMatcherRegistry.get(name)
 
         # Get the actual method from ExpectElement
         element_method = getattr(ExpectElement, name, None)
-        if element_method is None or not callable(element_method):
+
+        if matcher_fn is None and (element_method is None or not callable(element_method)):
             raise AttributeError(f"{type(self).__name__!r} object has no attribute {name!r}")
+
+        if matcher_fn is not None:
+
+            def _invoke_matcher(*args: Any, **kwargs: Any) -> None:
+                timeout = kwargs.pop("timeout", None)
+                polling = kwargs.pop("polling", None)
+
+                def condition() -> tuple[bool, Any]:
+                    try:
+                        el = self._driver.find_element(self._by, self._value)
+                    except NoSuchElementException:
+                        return (False, "element not found")
+                    try:
+                        return matcher_fn(el, *args, **kwargs)
+                    except StaleElementReferenceException:
+                        return (False, "stale element")
+
+                self._run_assertion(
+                    condition=condition,
+                    condition_name=name.replace("_", " "),
+                    expected=None,
+                    entity=self._entity_description(),
+                    timeout=timeout,
+                    polling=polling,
+                )
+
+            return _invoke_matcher
 
         def _invoke(*args: Any, **kwargs: Any) -> None:
             timeout = kwargs.pop("timeout", None)
@@ -97,9 +129,10 @@ class LocatorExpect(AssertionMixin):
                     el = self._driver.find_element(self._by, self._value)
                 except NoSuchElementException:
                     return (False, "element not found")
+                inner_config = self._config.replace(soft_mode=False, screenshot_on_failure=False)
                 temp = ExpectElement(
                     target=el,
-                    config=self._config,
+                    config=inner_config,
                     message=self._message,
                     negate=False,
                 )

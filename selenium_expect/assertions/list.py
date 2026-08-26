@@ -94,6 +94,52 @@ class ExpectList(AssertionMixin):
             polling=polling,
         )
 
+    def to_have_count_greater_than_or_equal(
+        self,
+        n: int,
+        *,
+        timeout: float | None = None,
+        polling: float | list[float] | None = None,
+    ) -> None:
+        """Assert len(elements) >= n."""
+        elements = self._target
+
+        def condition() -> tuple[bool, Any]:
+            actual = len(elements)
+            return (actual >= n, actual)
+
+        self._run_assertion(
+            condition=condition,
+            condition_name=f"to have count >= {n}",
+            expected=f">={n}",
+            entity="list",
+            timeout=timeout,
+            polling=polling,
+        )
+
+    def to_have_count_less_than_or_equal(
+        self,
+        n: int,
+        *,
+        timeout: float | None = None,
+        polling: float | list[float] | None = None,
+    ) -> None:
+        """Assert len(elements) <= n."""
+        elements = self._target
+
+        def condition() -> tuple[bool, Any]:
+            actual = len(elements)
+            return (actual <= n, actual)
+
+        self._run_assertion(
+            condition=condition,
+            condition_name=f"to have count <= {n}",
+            expected=f"<={n}",
+            entity="list",
+            timeout=timeout,
+            polling=polling,
+        )
+
     def to_be_empty(
         self,
         *,
@@ -148,6 +194,8 @@ class ExpectList(AssertionMixin):
         polling: float | list[float] | None = None,
     ) -> None:
         """Assert [el.text for el in elements] == texts (exact, ordered)."""
+        if not texts:
+            raise ValueError("texts list must not be empty")
         elements = self._target
 
         def condition() -> tuple[bool, Any]:
@@ -171,13 +219,15 @@ class ExpectList(AssertionMixin):
         polling: float | list[float] | None = None,
     ) -> None:
         """Assert each text in texts is in corresponding element.text."""
+        if not texts:
+            raise ValueError("texts list must not be empty")
         elements = self._target
 
         def condition() -> tuple[bool, Any]:
             actual = [el.text for el in elements]
             if len(actual) != len(texts):
                 return (False, actual)
-            return (all(t in a for a, t in zip(actual, texts, strict=False)), actual)
+            return (all(t in (a or "") for a, t in zip(actual, texts, strict=False)), actual)
 
         self._run_assertion(
             condition=condition,
@@ -200,7 +250,7 @@ class ExpectList(AssertionMixin):
         elements = self._target
 
         def condition() -> tuple[bool, Any]:
-            if index >= len(elements):
+            if index >= len(elements) or index < -len(elements):
                 return (False, f"index {index} out of range")
             actual = elements[index].text
             return (actual == text, actual)
@@ -249,7 +299,7 @@ class ExpectList(AssertionMixin):
 
         def condition() -> tuple[bool, Any]:
             actual = [el.text for el in elements]
-            return (all(text in (t or "") for t in actual), actual)
+            return (all(text in (t or "") for t in actual) and len(actual) > 0, actual)
 
         self._run_assertion(
             condition=condition,
@@ -295,12 +345,165 @@ class ExpectList(AssertionMixin):
 
         def condition() -> tuple[bool, Any]:
             actual = [el.text for el in elements]
-            return (not any(text in (t or "") for t in actual), actual)
+            return (not any(text in (t or "") for t in actual) and len(actual) > 0, actual)
 
         self._run_assertion(
             condition=condition,
             condition_name=f"to have no text containing {text!r}",
             expected=f"none containing {text!r}",
+            entity="list",
+            timeout=timeout,
+            polling=polling,
+        )
+
+    def to_have_exact_texts(
+        self,
+        *texts: str,
+        timeout: float | None = None,
+        polling: float | list[float] | None = None,
+    ) -> None:
+        """Assert [el.text for el in elements] == list(texts) (exact, ordered, varargs)."""
+        if not texts:
+            raise ValueError("At least one text must be provided")
+        elements = self._target
+        expected = list(texts)
+
+        def condition() -> tuple[bool, Any]:
+            actual = [el.text for el in elements]
+            return (actual == expected, actual)
+
+        self._run_assertion(
+            condition=condition,
+            condition_name=f"to have exact texts {expected!r}",
+            expected=expected,
+            entity="list",
+            timeout=timeout,
+            polling=polling,
+        )
+
+    def to_have_texts_containing(
+        self,
+        *texts: str,
+        timeout: float | None = None,
+        polling: float | list[float] | None = None,
+    ) -> None:
+        """Assert each element.text contains the corresponding text (varargs)."""
+        if not texts:
+            raise ValueError("At least one text must be provided")
+        elements = self._target
+        expected = list(texts)
+
+        def condition() -> tuple[bool, Any]:
+            actual = [el.text for el in elements]
+            if len(actual) != len(expected):
+                return (False, actual)
+            return (all(t in (a or "") for a, t in zip(actual, expected, strict=False)), actual)
+
+        self._run_assertion(
+            condition=condition,
+            condition_name=f"to have texts containing {expected!r}",
+            expected=expected,
+            entity="list",
+            timeout=timeout,
+            polling=polling,
+        )
+
+    def to_have_texts_in_any_order(
+        self,
+        *texts: str,
+        timeout: float | None = None,
+        polling: float | list[float] | None = None,
+    ) -> None:
+        """Assert element texts match texts in any order (varargs)."""
+        if not texts:
+            raise ValueError("At least one text must be provided")
+        elements = self._target
+        expected = sorted(texts)
+
+        def condition() -> tuple[bool, Any]:
+            actual = sorted(el.text for el in elements)
+            return (actual == expected, actual)
+
+        self._run_assertion(
+            condition=condition,
+            condition_name=f"to have texts in any order {list(texts)!r}",
+            expected=list(texts),
+            entity="list",
+            timeout=timeout,
+            polling=polling,
+        )
+
+    def to_have_first_text(
+        self,
+        text: str,
+        *,
+        timeout: float | None = None,
+        polling: float | list[float] | None = None,
+    ) -> None:
+        """Assert elements[0].text == text."""
+        elements = self._target
+
+        def condition() -> tuple[bool, Any]:
+            if not elements:
+                return (False, "empty list")
+            actual = elements[0].text
+            return (actual == text, actual)
+
+        self._run_assertion(
+            condition=condition,
+            condition_name=f"to have first text {text!r}",
+            expected=text,
+            entity="list",
+            timeout=timeout,
+            polling=polling,
+        )
+
+    def to_have_last_text(
+        self,
+        text: str,
+        *,
+        timeout: float | None = None,
+        polling: float | list[float] | None = None,
+    ) -> None:
+        """Assert elements[-1].text == text."""
+        elements = self._target
+
+        def condition() -> tuple[bool, Any]:
+            if not elements:
+                return (False, "empty list")
+            actual = elements[-1].text
+            return (actual == text, actual)
+
+        self._run_assertion(
+            condition=condition,
+            condition_name=f"to have last text {text!r}",
+            expected=text,
+            entity="list",
+            timeout=timeout,
+            polling=polling,
+        )
+
+    def to_have_nth_text_contains(
+        self,
+        index: int,
+        text: str,
+        *,
+        timeout: float | None = None,
+        polling: float | list[float] | None = None,
+    ) -> None:
+        """Assert text in elements[index].text."""
+        elements = self._target
+
+        def condition() -> tuple[bool, Any]:
+            if index >= len(elements) or index < -len(elements):
+                return (False, f"index {index} out of range")
+            actual = elements[index].text
+            return (text in (actual or ""), actual)
+
+        self._run_assertion(
+            condition=condition,
+            condition_name=f"to have text at [{index}] containing {text!r}",
+            expected=text,
             entity="list",
             timeout=timeout,
             polling=polling,
@@ -316,6 +519,8 @@ class ExpectList(AssertionMixin):
         polling: float | list[float] | None = None,
     ) -> None:
         """Assert [el.get_attribute('value') for el in elements] == values."""
+        if not values:
+            raise ValueError("values list must not be empty")
         elements = self._target
 
         def condition() -> tuple[bool, Any]:
@@ -343,7 +548,7 @@ class ExpectList(AssertionMixin):
         elements = self._target
 
         def condition() -> tuple[bool, Any]:
-            if index >= len(elements):
+            if index >= len(elements) or index < -len(elements):
                 return (False, f"index {index} out of range")
             actual = elements[index].get_attribute("value")
             return (actual == value, actual)
@@ -414,7 +619,7 @@ class ExpectList(AssertionMixin):
 
         def condition() -> tuple[bool, Any]:
             actual = [el.is_displayed() for el in elements]
-            return (not any(actual), actual)
+            return (not any(actual) and len(actual) > 0, actual)
 
         self._run_assertion(
             condition=condition,
@@ -484,7 +689,7 @@ class ExpectList(AssertionMixin):
         elements = self._target
 
         def condition() -> tuple[bool, Any]:
-            if index >= len(elements):
+            if index >= len(elements) or index < -len(elements):
                 return (False, f"index {index} out of range")
             actual = elements[index].get_attribute(name)
             return (actual == value, actual)
