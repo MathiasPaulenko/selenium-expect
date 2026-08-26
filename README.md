@@ -7,6 +7,23 @@ Playwright-style `expect()` assertions with auto-retry for Selenium Python. Stan
 [![Python](https://img.shields.io/pypi/pyversions/selenium-expect.svg)](https://pypi.org/project/selenium-expect/)
 [![License](https://img.shields.io/github/license/MathiasPaulenko/selenium-expect.svg)](https://github.com/MathiasPaulenko/selenium-expect/blob/main/LICENSE)
 [![Coverage](https://codecov.io/gh/MathiasPaulenko/selenium-expect/branch/main/graph/badge.svg)](https://codecov.io/gh/MathiasPaulenko/selenium-expect)
+[![Code style: ruff](https://img.shields.io/badge/code%20style-ruff-000000.svg)](https://docs.astral.sh/ruff/)
+
+---
+
+## Features
+
+- **Auto-retry** — no explicit `WebDriverWait` needed; assertions poll until timeout
+- **Fluent API** — `expect(el).to_be_visible().not_.to_be_disabled()`
+- **Negation** — every assertion supports `.not_` out of the box
+- **Soft assertions** — accumulate failures, assert all at once
+- **Custom matchers** — extend `expect()` with your own assertions via `@extend`
+- **Locator re-find** — `expect(driver, by=By.ID, value="x")` re-finds on each poll
+- **Polling** — fixed interval or backoff schedule
+- **150+ assertions** — elements, lists, cookies, alerts, JS state, shadow DOM, select, iframe, window
+- **Descriptive errors** — timeline, HTML snippet, poll count, custom messages
+- **Zero dependencies** — only requires Selenium 4.10+
+- **Fully typed** — `py.typed` included, strict mypy clean
 
 ---
 
@@ -162,6 +179,8 @@ slow_expect(driver).to_have_title("Slow Page")
 | `to_have_url(url)` | `driver.current_url` |
 | `to_have_url_contains(url)` | `url in driver.current_url` |
 | `to_have_url_matches(pattern)` | `re.search(pattern, driver.current_url)` |
+| `to_have_url_changes(url)` | `driver.current_url != url` |
+| `to_have_ready_state(state)` | `driver.execute_script('return document.readyState')` |
 | `to_have_window_count(n)` | `len(driver.window_handles)` |
 | `to_have_window_count_greater_than(n)` | `len(driver.window_handles) > n` |
 | `to_have_window_count_less_than(n)` | `len(driver.window_handles) < n` |
@@ -169,13 +188,17 @@ slow_expect(driver).to_have_title("Slow Page")
 | `to_have_browser_name(name)` | `driver.name` |
 | `to_have_orientation(orientation)` | `driver.orientation` |
 | `to_have_capability(key, value)` | `driver.capabilities[key]` |
+| `to_have_capability_contains(key, value)` | `value in str(driver.capabilities[key])` |
 | `to_have_page_source_contains(text)` | `text in driver.page_source` |
 | `to_have_page_source_matches(pattern)` | `re.search(pattern, driver.page_source)` |
+| `to_have_page_source_not_contains(text)` | `text not in driver.page_source` |
 | `to_have_window_position(x, y)` | `driver.get_window_position()` |
 | `to_have_window_size(w, h)` | `driver.get_window_size()` |
 | `to_have_window_rect(x, y, w, h)` | `driver.get_window_rect()` |
 | `to_have_active_element_tag(tag)` | `driver.switch_to.active_element.tag_name` |
 | `to_have_active_element_id(id)` | `driver.switch_to.active_element.get_attribute('id')` |
+| `to_have_active_element_class(class_name)` | `driver.switch_to.active_element.get_attribute('class')` |
+| `to_have_new_window_opened(previous_handles)` | new handle not in `previous_handles` |
 
 ### Element — State
 
@@ -191,6 +214,12 @@ slow_expect(driver).to_have_title("Slow Page")
 | `to_be_absent()` | `StaleElementReferenceException` / `NoSuchElementException` |
 | `to_be_clickable()` | `is_displayed() and is_enabled()` |
 | `to_be_stale()` | `StaleElementReferenceException` on access |
+| `to_be_unselected()` | `not element.is_selected()` |
+| `to_be_unchecked()` | `not element.is_selected()` |
+| `to_be_focused()` | `element == driver.switch_to.active_element` |
+| `to_be_editable()` | `element.is_enabled() and not element.get_attribute('readonly')` |
+| `to_be_readonly()` | `element.get_attribute('readonly') is not None` |
+| `to_be_empty()` | `element.text.strip() == ''` |
 
 ### Element — Text
 
@@ -201,8 +230,13 @@ slow_expect(driver).to_have_title("Slow Page")
 | `to_have_text_matches(pattern)` | `re.search(pattern, element.text)` |
 | `to_have_text_empty()` | `element.text == ''` |
 | `to_have_text_not_empty()` | `element.text != ''` |
+| `to_have_text_starting_with(prefix)` | `element.text.startswith(prefix)` |
+| `to_have_text_ending_with(suffix)` | `element.text.endswith(suffix)` |
+| `to_have_text_in_list(texts)` | `element.text in texts` |
 | `to_have_value(value)` | `element.get_attribute('value')` |
 | `to_have_value_contains(value)` | `value in element.get_attribute('value')` |
+| `to_have_value_matches(pattern)` | `re.search(pattern, element.get_attribute('value'))` |
+| `to_have_value_in_list(values)` | `element.get_attribute('value') in values` |
 
 ### Element — Attributes
 
@@ -214,6 +248,11 @@ slow_expect(driver).to_have_title("Slow Page")
 | `to_have_attribute_empty(name)` | `element.get_attribute(name) in ('', None)` |
 | `to_have_attribute_present(name)` | `element.get_attribute(name) is not None` |
 | `to_have_attribute_absent(name)` | `element.get_attribute(name) is None` |
+| `to_have_attribute_in_list(name, values)` | `element.get_attribute(name) in values` |
+| `to_have_dom_attribute(name, value)` | `element.get_dom_attribute(name)` |
+| `to_have_dom_attribute_contains(name, value)` | `value in element.get_dom_attribute(name)` |
+| `to_have_property(name, value)` | `element.get_property(name)` |
+| `to_have_property_contains(name, value)` | `value in str(element.get_property(name))` |
 
 ### Element — CSS
 
@@ -221,6 +260,7 @@ slow_expect(driver).to_have_title("Slow Page")
 |---|---|
 | `to_have_css_property(name, value)` | `element.value_of_css_property(name)` |
 | `to_have_css_property_contains(name, value)` | `value in element.value_of_css_property(name)` |
+| `to_have_css_property_matches(name, pattern)` | `re.search(pattern, element.value_of_css_property(name))` |
 
 ### Element — Identity
 
@@ -230,6 +270,10 @@ slow_expect(driver).to_have_title("Slow Page")
 | `to_have_id(id)` | `element.get_attribute('id')` |
 | `to_have_class(class_name)` | `class_name in element.get_attribute('class').split()` |
 | `to_have_class_contains(class_name)` | `class_name in element.get_attribute('class')` |
+| `to_contain_class(class_name)` | `class_name in element.get_attribute('class')` |
+| `to_have_class_matching(pattern)` | `re.search(pattern, class) for class in classes` |
+| `to_have_all_classes(classes)` | `set(classes).issubset(elem_classes)` |
+| `to_have_class_in_list(classes)` | `any(class in elem_classes for class in classes)` |
 
 ### Element — Position / Dimensions
 
@@ -242,6 +286,11 @@ slow_expect(driver).to_have_title("Slow Page")
 | `to_have_size_width(width)` | `element.size['width']` |
 | `to_have_size_height(height)` | `element.size['height']` |
 | `to_have_rect(x, y, w, h)` | `element.rect` |
+| `to_have_location_greater_than(x, y)` | `element.location > (x, y)` |
+| `to_have_location_less_than(x, y)` | `element.location < (x, y)` |
+| `to_have_size_greater_than(w, h)` | `element.size > (w, h)` |
+| `to_have_size_less_than(w, h)` | `element.size < (w, h)` |
+| `to_have_location_once_scrolled_into_view(x, y)` | `element.location` after scroll |
 
 ### Element — Accessibility (Selenium 4+)
 
@@ -249,8 +298,12 @@ slow_expect(driver).to_have_title("Slow Page")
 |---|---|
 | `to_have_aria_role(role)` | `element.aria_role` |
 | `to_have_aria_role_contains(role)` | `role in element.aria_role` |
+| `to_have_aria_role_in_list(roles)` | `element.aria_role in roles` |
 | `to_have_accessible_name(name)` | `element.accessible_name` |
 | `to_have_accessible_name_contains(name)` | `name in element.accessible_name` |
+| `to_have_js_property(name, value)` | `element.get_property(name)` via JS |
+| `to_have_shadow_root()` | `element.shadow_root is not None` |
+| `to_have_shadow_root_absent()` | `element.shadow_root is None` |
 
 ### List
 
@@ -259,16 +312,25 @@ slow_expect(driver).to_have_title("Slow Page")
 | `to_have_count(n)` | `len(elements)` |
 | `to_have_count_greater_than(n)` | `len(elements) > n` |
 | `to_have_count_less_than(n)` | `len(elements) < n` |
+| `to_have_count_greater_than_or_equal(n)` | `len(elements) >= n` |
+| `to_have_count_less_than_or_equal(n)` | `len(elements) <= n` |
 | `to_be_empty()` | `len(elements) == 0` |
 | `to_be_not_empty()` | `len(elements) > 0` |
 | `to_have_texts(texts)` | `[el.text for el in elements]` |
 | `to_have_texts_contains(texts)` | substring per element |
+| `to_have_exact_texts(texts)` | exact text per element |
+| `to_have_texts_containing(texts)` | each text contains substring |
+| `to_have_texts_in_any_order(texts)` | same texts, any order |
 | `to_have_text_at(index, text)` | `elements[index].text` |
+| `to_have_first_text(text)` | `elements[0].text` |
+| `to_have_last_text(text)` | `elements[-1].text` |
+| `to_have_nth_text_contains(index, text)` | `text in elements[index].text` |
 | `to_have_any_text(text)` | any element has text |
 | `to_have_all_texts_contain(text)` | all elements contain text |
 | `to_have_any_text_contain(text)` | any element contains text |
 | `to_have_none_text_contain(text)` | no element contains text |
 | `to_have_values(values)` | `[el.get_attribute('value') for el in elements]` |
+| `to_have_value_at(index, value)` | `elements[index].get_attribute('value')` |
 | `to_have_all_visible()` | all `is_displayed()` |
 | `to_have_any_visible()` | any `is_displayed()` |
 | `to_have_none_visible()` | none `is_displayed()` |
@@ -301,6 +363,8 @@ slow_expect(driver).to_have_title("Slow Page")
 | `to_have_cookie_same_site(name, same_site)` | `driver.get_cookie(name)['sameSite']` |
 | `to_have_cookie_count(n)` | `len(driver.get_cookies())` |
 | `to_have_no_cookies()` | `len(driver.get_cookies()) == 0` |
+| `to_have_cookie_count_greater_than(n)` | `len(driver.get_cookies()) > n` |
+| `to_have_cookie_expiry(name, expiry)` | `driver.get_cookie(name)['expiry']` |
 
 ### JavaScript / Browser state
 
@@ -308,12 +372,16 @@ slow_expect(driver).to_have_title("Slow Page")
 |---|---|
 | `to_have_js_result(script, expected)` | `driver.execute_script(script)` |
 | `to_have_js_result_contains(script, expected)` | `expected in driver.execute_script(script)` |
+| `to_have_js_result_matches(script, pattern)` | `re.search(pattern, str(driver.execute_script(script)))` |
 | `to_have_async_js_result(script, expected)` | `driver.execute_async_script(script)` |
+| `to_have_js_variable(name, value)` | `window[name]` via JS |
 | `to_have_local_storage_item(key, value)` | `localStorage.getItem(key)` via JS |
 | `to_have_local_storage_item_present(key)` | `localStorage.getItem(key) is not None` |
 | `to_have_local_storage_item_absent(key)` | `localStorage.getItem(key) is None` |
 | `to_have_local_storage_length(n)` | `localStorage.length` via JS |
 | `to_have_session_storage_item(key, value)` | `sessionStorage.getItem(key)` via JS |
+| `to_have_session_storage_item_present(key)` | `sessionStorage.getItem(key) is not None` |
+| `to_have_session_storage_item_absent(key)` | `sessionStorage.getItem(key) is None` |
 | `to_have_session_storage_length(n)` | `sessionStorage.length` via JS |
 
 ### Shadow DOM
@@ -331,16 +399,20 @@ slow_expect(driver).to_have_title("Slow Page")
 | Assertion | Selenium API |
 |---|---|
 | `to_have_value(value)` | `select.first_selected_option.get_attribute('value')` |
+| `to_have_first_selected_value(value)` | `select.first_selected_option.get_attribute('value')` |
 | `to_have_selected_text(text)` | `select.first_selected_option.text` |
 | `to_have_selected_values(values)` | `[opt.get_attribute('value') for opt in select.all_selected_options]` |
 | `to_have_selected_texts(texts)` | `[opt.text for opt in select.all_selected_options]` |
 | `to_have_selected_count(n)` | `len(select.all_selected_options)` |
 | `to_have_option_count(n)` | `len(select.options)` |
+| `to_have_option_count_greater_than(n)` | `len(select.options) > n` |
 | `to_have_option_at_index(index, text)` | `select.options[index].text` |
 | `to_have_option(value)` | value exists in options |
 | `to_have_option_text(text)` | text exists in options |
 | `to_be_multiple()` | `select.is_multiple` |
 | `to_be_single_select()` | `not select.is_multiple` |
+| `to_have_selected_index(index)` | `select.options[index].is_selected()` |
+| `to_have_no_selection()` | `len(select.all_selected_options) == 0` |
 
 ### Iframe
 
@@ -348,7 +420,10 @@ slow_expect(driver).to_have_title("Slow Page")
 |---|---|
 | `to_have_frame_available(frame_id)` | `driver.switch_to.frame(frame_id)` |
 | `to_have_frame_count(n)` | `len(driver.find_elements(By.TAG_NAME, 'iframe'))` |
+| `to_have_frame_count_greater_than(n)` | `len(driver.find_elements(By.TAG_NAME, 'iframe')) > n` |
 | `to_have_frame_text(frame_id, text)` | switch to frame, check page_source |
+| `to_be_in_frame(frame_id)` | `driver.switch_to.frame(frame_id)` succeeds |
+| `to_be_in_default_content()` | `driver.switch_to.default_content()` succeeds |
 
 ### Window
 
@@ -437,6 +512,22 @@ expect.poll(
 ).to_equal("complete")
 ```
 
+### `expect.configure()`
+
+Create pre-configured `expect` variants:
+
+```python
+# Fast assertions for frequent checks
+fast_expect = expect.configure(timeout=1.0, polling=0.1)
+fast_expect(button).to_be_visible()
+
+# Strict assertions for critical paths
+strict_expect = expect.configure(timeout=30.0, soft=True)
+strict_expect(form).to_be_visible()
+strict_expect(form).to_have_attribute("method", "POST")
+assert_all()  # Check all soft assertions
+```
+
 ### Composition
 
 Combine multiple assertions:
@@ -511,9 +602,26 @@ AssertionError: Expected element to have text "Loaded!", but got "Loading..."
 
 ---
 
+## Contributing
+
+Contributions are welcome! See [CONTRIBUTING.md](https://github.com/MathiasPaulenko/selenium-expect/blob/main/CONTRIBUTING.md) for development setup and guidelines.
+
+Please report security vulnerabilities privately — see [SECURITY.md](https://github.com/MathiasPaulenko/selenium-expect/blob/main/SECURITY.md).
+
+---
+
 ## Links
 
 - [Documentation](https://mathiaspaulenko.github.io/selenium-expect/)
 - [Changelog](https://github.com/MathiasPaulenko/selenium-expect/blob/main/CHANGELOG.md)
+- [Contributing](https://github.com/MathiasPaulenko/selenium-expect/blob/main/CONTRIBUTING.md)
+- [Security Policy](https://github.com/MathiasPaulenko/selenium-expect/blob/main/SECURITY.md)
+- [Code of Conduct](https://github.com/MathiasPaulenko/selenium-expect/blob/main/CODE_OF_CONDUCT.md)
 - [Issues](https://github.com/MathiasPaulenko/selenium-expect/issues)
 - [PyPI](https://pypi.org/project/selenium-expect/)
+
+---
+
+## Acknowledgements
+
+Inspired by [Playwright](https://playwright.dev/)'s assertion API and [`@playwright/test`'s `expect()`](https://playwright.dev/python/docs/test-assertions). Built on [Selenium](https://www.selenium.dev/) Python bindings.
