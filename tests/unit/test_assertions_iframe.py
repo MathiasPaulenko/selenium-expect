@@ -37,3 +37,25 @@ class TestExpectIframe:
         """ExpectIframe(driver).to_have_frame_text('frame1', 'Missing') raises."""
         with pytest.raises(AssertionError, match="frame"):
             ExpectIframe(mock_driver_iframe).to_have_frame_text("frame1", "Missing text")
+
+    def test_to_have_frame_text_switches_back_on_success(self, mock_driver_iframe: Any) -> None:
+        """to_have_frame_text calls default_content after reading page_source."""
+        ExpectIframe(mock_driver_iframe).to_have_frame_text("frame1", "Frame content")
+        mock_driver_iframe.switch_to.default_content.assert_called()
+
+    def test_to_have_frame_text_switches_back_on_exception(self, mock_driver_iframe: Any) -> None:
+        """to_have_frame_text calls default_content even if page_source raises.
+
+        Regression: previously, if page_source raised a non-NoSuchFrameException,
+        default_content was never called, leaving the driver stuck in the frame.
+        """
+        from unittest.mock import PropertyMock
+
+        from selenium.common.exceptions import WebDriverException
+
+        type(mock_driver_iframe).page_source = PropertyMock(
+            side_effect=WebDriverException("navigation interrupted")
+        )
+        with pytest.raises(WebDriverException):
+            ExpectIframe(mock_driver_iframe).to_have_frame_text("frame1", "Frame content")
+        mock_driver_iframe.switch_to.default_content.assert_called()

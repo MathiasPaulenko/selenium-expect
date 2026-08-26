@@ -6,7 +6,7 @@ from typing import Any
 
 import pytest
 
-from selenium_expect import expect, extend
+from selenium_expect import expect, extend, merge_expects
 from selenium_expect._matcher import CustomMatcherRegistry
 
 
@@ -122,3 +122,100 @@ class TestCustomMatcherIntegration:
         """Accessing an unregistered matcher name raises AttributeError."""
         with pytest.raises(AttributeError, match="to_have_nonexistent"):
             expect(mock_element).to_have_nonexistent  # noqa: B018
+
+
+class TestMergeExpects:
+    def test_merge_from_module(self) -> None:
+        """merge_expects registers matchers from a module object."""
+        import types
+
+        mod = types.ModuleType("test_matchers_mod")
+
+        @extend("to_be_merged_1")
+        def matcher_1(target: Any) -> tuple[bool, Any]:
+            return (True, "ok")
+
+        mod.to_be_merged_1 = matcher_1
+
+        @extend("to_be_merged_2")
+        def matcher_2(target: Any) -> tuple[bool, Any]:
+            return (False, "fail")
+
+        mod.to_be_merged_2 = matcher_2
+
+        CustomMatcherRegistry.reset()
+        added = merge_expects(mod)
+
+        assert "to_be_merged_1" in added
+        assert "to_be_merged_2" in added
+        assert CustomMatcherRegistry.get("to_be_merged_1") is matcher_1
+        assert CustomMatcherRegistry.get("to_be_merged_2") is matcher_2
+
+    def test_merge_skips_already_registered(self) -> None:
+        """merge_expects does not re-register already present matchers."""
+        import types
+
+        @extend("to_be_merged_existing")
+        def matcher_existing(target: Any) -> tuple[bool, Any]:
+            return (True, "ok")
+
+        mod = types.ModuleType("test_matchers_mod_2")
+        mod.to_be_merged_existing = matcher_existing
+
+        added = merge_expects(mod)
+        assert added == []
+
+    def test_merge_multiple_modules(self) -> None:
+        """merge_expects combines matchers from multiple modules."""
+        import types
+
+        mod_a = types.ModuleType("mod_a")
+        mod_b = types.ModuleType("mod_b")
+
+        @extend("to_be_from_a")
+        def matcher_a(target: Any) -> tuple[bool, Any]:
+            return (True, "a")
+
+        @extend("to_be_from_b")
+        def matcher_b(target: Any) -> tuple[bool, Any]:
+            return (True, "b")
+
+        mod_a.to_be_from_a = matcher_a
+        mod_b.to_be_from_b = matcher_b
+
+        CustomMatcherRegistry.reset()
+        added = merge_expects(mod_a, mod_b)
+
+        assert "to_be_from_a" in added
+        assert "to_be_from_b" in added
+
+    def test_merge_empty_modules(self) -> None:
+        """merge_expects with no matchers returns empty list."""
+        import types
+
+        mod = types.ModuleType("empty_mod")
+        CustomMatcherRegistry.reset()
+        added = merge_expects(mod)
+        assert added == []
+
+    def test_merge_integration_with_expect(self, mock_element: Any) -> None:
+        """merge_expects matchers work with expect()."""
+        import types
+
+        mod = types.ModuleType("integration_mod")
+
+        @extend("to_be_custom_merged")
+        def custom_check(element: Any) -> tuple[bool, Any]:
+            return (element.is_displayed(), True)
+
+        mod.to_be_custom_merged = custom_check
+
+        CustomMatcherRegistry.reset()
+        merge_expects(mod)
+
+        expect(mock_element).to_be_custom_merged()
+
+    def test_merge_no_modules(self) -> None:
+        """merge_expects with no args returns empty list."""
+        CustomMatcherRegistry.reset()
+        assert merge_expects() == []

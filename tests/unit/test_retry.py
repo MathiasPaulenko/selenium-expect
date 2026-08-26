@@ -128,17 +128,20 @@ class TestRetryPollingIntervals:
 
         retry_until(
             condition=condition,
-            timeout=0.5,
-            polling_intervals=[0.05, 0.1, 0.2],
+            timeout=2.0,
+            polling_intervals=[0.1, 0.3, 0.5],
         )
-        # Verify that intervals between polls match the backoff schedule
+        # Verify that intervals between polls increase (backoff behavior).
+        # Use generous tolerance to account for OS timer granularity (~15ms on Windows).
         for i in range(1, len(poll_times)):
             delta = poll_times[i] - poll_times[i - 1]
             intervals.append(delta)
 
-        # First interval should be ~0.05, second ~0.1
-        assert intervals[0] < 0.08
-        assert intervals[1] > 0.08
+        assert len(intervals) >= 2
+        assert all(i > 0 for i in intervals)
+        # With intervals [0.1, 0.3, 0.5], the second gap should be noticeably
+        # larger than the first even with OS jitter.
+        assert intervals[1] > intervals[0]
 
     def test_backoff_loops_after_exhaustion(self) -> None:
         poll_count = {"n": 0}

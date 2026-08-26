@@ -330,16 +330,26 @@ def mock_driver_with_cookies(mock_driver: Any) -> Any:
 @pytest.fixture()
 def mock_driver_js(mock_driver: Any) -> Any:
     """Mock WebDriver with execute_script/execute_async_script."""
-    js_values: dict[str, Any] = {
-        "return localStorage.getItem('token');": "abc123",
+    ls_values: dict[str, Any] = {"token": "abc123"}
+    ss_values: dict[str, Any] = {"key": "value123"}
+    static_js: dict[str, Any] = {
         "return localStorage.length;": 3,
-        "return sessionStorage.getItem('key');": "value123",
         "return sessionStorage.length;": 2,
         "return document.readyState;": "complete",
         "return window.innerWidth;": 1280,
     }
-    mock_driver.execute_script.side_effect = lambda script, *args: js_values.get(script)
-    mock_driver.execute_async_script.side_effect = lambda script, *args: js_values.get(script)
+
+    def _execute(script: str, *args: Any) -> Any:
+        if script == "return localStorage.getItem(arguments[0]);":
+            return ls_values.get(args[0]) if args else None
+        if script == "return sessionStorage.getItem(arguments[0]);":
+            return ss_values.get(args[0]) if args else None
+        if script == "return window[arguments[0]];":
+            return static_js.get("return window.innerWidth;")
+        return static_js.get(script)
+
+    mock_driver.execute_script.side_effect = _execute
+    mock_driver.execute_async_script.side_effect = _execute
     return mock_driver
 
 

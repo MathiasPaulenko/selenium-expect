@@ -54,6 +54,16 @@ class TestPollAssertion:
         with pytest.raises(AssertionError, match="to contain"):
             poll(lambda: "hello", timeout=0.5).to_contain("missing")
 
+    def test_to_contain_non_iterable_fails(self) -> None:
+        """poll(fn).to_contain('x') raises AssertionError (not TypeError) when fn returns int.
+
+        Regression: previously, `expected in actual` on a non-iterable raised
+        TypeError which propagated uncaught instead of being treated as a
+        failed assertion.
+        """
+        with pytest.raises(AssertionError, match="to contain"):
+            poll(lambda: 42, timeout=0.3).to_contain("x")
+
     def test_to_match_passes(self) -> None:
         """poll(fn).to_match(r'\\\\d+') passes when fn returns 'abc123'."""
         poll(lambda: "abc123").to_match(r"\d+")
@@ -80,6 +90,24 @@ class TestPollAssertion:
         """poll(fn).to_be_less_than(5) raises when fn returns 10."""
         with pytest.raises(AssertionError, match="less than"):
             poll(lambda: 10, timeout=0.5).to_be_less_than(5)
+
+    def test_to_be_greater_than_non_comparable_fails(self) -> None:
+        """to_be_greater_than(5) raises AssertionError (not TypeError) on None.
+
+        Regression: previously, `None > 5` raised TypeError which propagated
+        uncaught instead of being treated as a failed assertion.
+        """
+        with pytest.raises(AssertionError, match="greater than"):
+            poll(lambda: None, timeout=0.3).to_be_greater_than(5)
+
+    def test_to_be_less_than_non_comparable_fails(self) -> None:
+        """to_be_less_than(5) raises AssertionError (not TypeError) on None.
+
+        Regression: previously, `None < 5` raised TypeError which propagated
+        uncaught instead of being treated as a failed assertion.
+        """
+        with pytest.raises(AssertionError, match="less than"):
+            poll(lambda: None, timeout=0.3).to_be_less_than(5)
 
     def test_to_be_in_list_passes(self) -> None:
         """poll(fn).to_be_in_list([1, 2, 3]) passes when fn returns 2."""
@@ -120,3 +148,27 @@ class TestExpectPoll:
         result = expect.poll(lambda: 42)
         assert isinstance(result, PollAssertion)
         result.to_equal(42)
+
+
+class TestPollNegativeValidation:
+    """Regression: negative timeout/polling passed to poll() must raise
+    ValueError with a clear message, not an opaque
+    'sleep length must be non-negative' from time.sleep().
+    """
+
+    def test_negative_timeout_raises_valueerror(self) -> None:
+        with pytest.raises(ValueError, match="timeout must be >= 0"):
+            poll(lambda: 42, timeout=-1)
+
+    def test_negative_polling_raises_valueerror(self) -> None:
+        with pytest.raises(ValueError, match="polling interval must be >= 0"):
+            poll(lambda: 42, polling=-0.5)
+
+    def test_negative_polling_in_list_raises_valueerror(self) -> None:
+        with pytest.raises(ValueError, match="polling_intervals"):
+            poll(lambda: 42, polling=[0.1, -0.5, 1.0])
+
+    def test_zero_timeout_allowed(self) -> None:
+        """timeout=0 is valid — single poll, no retry."""
+        with pytest.raises(AssertionError, match="to equal"):
+            poll(lambda: 42, timeout=0).to_equal(99)

@@ -102,6 +102,16 @@ class TestGlobalConfigSetters:
         set_default_timeout(42.0)
         assert get_config().timeout == 42.0
 
+    def test_set_default_timeout_normalizes_milliseconds(self) -> None:
+        """set_default_timeout(5000) should be 5.0 seconds, not 5000.0."""
+        set_default_timeout(5000)
+        assert get_config().timeout == 5.0
+
+    def test_set_default_timeout_normalizes_float_seconds(self) -> None:
+        """Floats < 1000 are treated as seconds."""
+        set_default_timeout(2.5)
+        assert get_config().timeout == 2.5
+
     def test_config_resets_between_tests(self) -> None:
         """autouse fixture resets config — verify isolation."""
         assert get_config().timeout == 5.0

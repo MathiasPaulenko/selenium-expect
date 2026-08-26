@@ -63,7 +63,57 @@ class TestExpectSelect:
         """expect(select).to_be_single_select() passes for single-select."""
         expect(mock_select).to_be_single_select()
 
+    def test_to_have_selected_index(self, mock_select: Any) -> None:
+        """expect(select).to_have_selected_index(0) passes (opt1 is selected)."""
+        expect(mock_select).to_have_selected_index(0)
+
+    def test_to_have_selected_index_fails(self, mock_select: Any) -> None:
+        """expect(select).to_have_selected_index(1) raises (opt2 not selected)."""
+        with pytest.raises(AssertionError, match="to have selected index"):
+            expect(mock_select).to_have_selected_index(1)
+
+    def test_not_to_have_selected_index(self, mock_select: Any) -> None:
+        """expect(select).not_.to_have_selected_index(1) passes."""
+        expect(mock_select).not_.to_have_selected_index(1)
+
+    def test_to_have_selected_index_out_of_range(self, mock_select: Any) -> None:
+        """expect(select).to_have_selected_index(99) raises."""
+        with pytest.raises(AssertionError, match="to have selected index"):
+            expect(mock_select).to_have_selected_index(99)
+
+    def test_to_have_no_selection(self, mock_select: Any) -> None:
+        """expect(select).to_have_no_selection() passes when no options selected."""
+        mock_select.all_selected_options = []
+        expect(mock_select).to_have_no_selection()
+
+    def test_to_have_no_selection_fails(self, mock_select: Any) -> None:
+        """expect(select).to_have_no_selection() raises when options selected."""
+        with pytest.raises(AssertionError, match="to have no selection"):
+            expect(mock_select).to_have_no_selection()
+
+    def test_not_to_have_no_selection(self, mock_select: Any) -> None:
+        """expect(select).not_.to_have_no_selection() passes when options selected."""
+        expect(mock_select).not_.to_have_no_selection()
+
     # --- Failure cases ---
+
+    def test_to_have_selected_values_empty_list_raises(self, mock_select: Any) -> None:
+        """to_have_selected_values([]) raises ValueError — not vacuous pass via [] == [].
+
+        Regression: previously, an empty values list with no selected options
+        would pass vacuously via [] == [] == True.
+        """
+        with pytest.raises(ValueError, match="values list must not be empty"):
+            expect(mock_select).to_have_selected_values([])
+
+    def test_to_have_selected_texts_empty_list_raises(self, mock_select: Any) -> None:
+        """to_have_selected_texts([]) raises ValueError — not vacuous pass via [] == [].
+
+        Regression: previously, an empty texts list with no selected options
+        would pass vacuously via [] == [] == True.
+        """
+        with pytest.raises(ValueError, match="texts list must not be empty"):
+            expect(mock_select).to_have_selected_texts([])
 
     def test_to_have_value_fails(self, mock_select: Any) -> None:
         """expect(select).to_have_value('wrong') raises."""

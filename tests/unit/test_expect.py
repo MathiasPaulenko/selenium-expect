@@ -137,3 +137,25 @@ class TestExpectLocator:
 
         result = expect(mock_driver, by="id", value="foo")
         assert isinstance(result, LocatorExpect)
+
+    def test_by_without_value_raises(self, mock_driver: Any) -> None:
+        """expect(driver, by='id') without value raises ValueError."""
+        with pytest.raises(ValueError, match="both 'by' and 'value'"):
+            expect(mock_driver, by="id")  # type: ignore[call-arg]
+
+    def test_value_without_by_raises(self, mock_driver: Any) -> None:
+        """expect(driver, value='foo') without by raises ValueError."""
+        with pytest.raises(ValueError, match="both 'by' and 'value'"):
+            expect(mock_driver, value="foo")  # type: ignore[call-arg]
+
+    def test_locator_tuple_returns_locator(self, mock_driver: Any) -> None:
+        """expect(driver, locator=('id', 'foo')) returns LocatorExpect."""
+        from selenium_expect._locator import LocatorExpect
+
+        result = expect(mock_driver, locator=("id", "foo"))
+        assert isinstance(result, LocatorExpect)
+
+    def test_locator_with_by_raises(self, mock_driver: Any) -> None:
+        """expect(driver, locator=..., by=...) raises ValueError."""
+        with pytest.raises(ValueError, match="Cannot use both"):
+            expect(mock_driver, locator=("id", "foo"), by="id", value="bar")

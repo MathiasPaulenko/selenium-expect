@@ -56,6 +56,36 @@ class TestExpectDriverUrl:
             expect(mock_driver).to_have_url("https://wrong.com")
 
 
+class TestExpectDriverUrlChanges:
+    def test_to_have_url_changes_passes(self, mock_driver: Any) -> None:
+        """expect(driver).to_have_url_changes('https://old.com') passes when URL differs."""
+        expect(mock_driver).to_have_url_changes("https://old.com")
+
+    def test_to_have_url_changes_fails(self, mock_driver: Any) -> None:
+        """expect(driver).to_have_url_changes(current_url) raises."""
+        with pytest.raises(AssertionError, match="URL changed"):
+            expect(mock_driver).to_have_url_changes("https://example.com/page")
+
+    def test_to_have_url_changes_negation(self, mock_driver: Any) -> None:
+        """expect(driver).not_.to_have_url_changes(current_url) passes."""
+        expect(mock_driver).not_.to_have_url_changes("https://example.com/page")
+
+
+class TestExpectDriverReadyState:
+    def test_to_have_ready_state_complete(self, mock_driver_js: Any) -> None:
+        """expect(driver).to_have_ready_state('complete') passes."""
+        expect(mock_driver_js).to_have_ready_state("complete")
+
+    def test_to_have_ready_state_fails(self, mock_driver_js: Any) -> None:
+        """expect(driver).to_have_ready_state('loading') raises."""
+        with pytest.raises(AssertionError, match="ready state"):
+            expect(mock_driver_js).to_have_ready_state("loading")
+
+    def test_to_have_ready_state_negation(self, mock_driver_js: Any) -> None:
+        """expect(driver).not_.to_have_ready_state('loading') passes."""
+        expect(mock_driver_js).not_.to_have_ready_state("loading")
+
+
 class TestExpectDriverWindows:
     def test_to_have_window_count(self, mock_driver: Any) -> None:
         """expect(driver).to_have_window_count(1) passes."""
@@ -153,6 +183,30 @@ class TestExpectDriverActiveElement:
         """expect(driver).to_have_active_element_tag('div') raises."""
         with pytest.raises(AssertionError, match="active element tag"):
             expect(mock_driver).to_have_active_element_tag("div")
+
+    def test_to_have_active_element_class(self, mock_driver: Any) -> None:
+        """expect(driver).to_have_active_element_class passes when class is present."""
+        mock_driver.switch_to.active_element.get_attribute.return_value = "btn primary"
+        expect(mock_driver).to_have_active_element_class("btn")
+
+    def test_to_have_active_element_class_fails(self, mock_driver: Any) -> None:
+        """expect(driver).to_have_active_element_class raises when class is absent."""
+        mock_driver.switch_to.active_element.get_attribute.return_value = "btn primary"
+        with pytest.raises(AssertionError, match="active element class"):
+            expect(mock_driver).to_have_active_element_class("secondary")
+
+    def test_to_have_active_element_class_uses_split_not_substring(self, mock_driver: Any) -> None:
+        """Regression: to_have_active_element_class must use .split() matching,
+        not substring matching. 'btn' must NOT match class 'btn-primary'."""
+        mock_driver.switch_to.active_element.get_attribute.return_value = "btn-primary"
+        with pytest.raises(AssertionError):
+            expect(mock_driver).to_have_active_element_class("btn")
+
+    def test_to_have_active_element_class_none(self, mock_driver: Any) -> None:
+        """to_have_active_element_class handles None class attribute gracefully."""
+        mock_driver.switch_to.active_element.get_attribute.return_value = None
+        with pytest.raises(AssertionError):
+            expect(mock_driver).to_have_active_element_class("btn")
 
 
 class TestExpectDriverDispatch:

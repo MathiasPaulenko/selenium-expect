@@ -18,6 +18,17 @@ class TestExpectJS:
         """to_have_js_result_contains with 'comp' substring passes."""
         ExpectJS(mock_driver_js).to_have_js_result_contains("return document.readyState;", "comp")
 
+    def test_to_have_js_result_contains_non_iterable_fails(self, mock_driver_js: Any) -> None:
+        """to_have_js_result_contains raises AssertionError (not TypeError) when JS returns int.
+
+        Regression: previously, `expected in actual` on a non-iterable raised
+        TypeError which propagated uncaught instead of being treated as a
+        failed assertion.
+        """
+        mock_driver_js.execute_script.side_effect = lambda script, *args: 42
+        with pytest.raises(AssertionError, match="to have JS result containing"):
+            ExpectJS(mock_driver_js).to_have_js_result_contains("return 42;", "x")
+
     def test_to_have_js_result_matches(self, mock_driver_js: Any) -> None:
         """to_have_js_result_matches with r'comp\\w+' pattern passes."""
         ExpectJS(mock_driver_js).to_have_js_result_matches(

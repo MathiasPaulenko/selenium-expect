@@ -49,9 +49,14 @@ class TestSatisfyAll:
         with pytest.raises(AssertionError, match="to_satisfy_all"):
             satisfy_all(mock_element, _always_fail, _always_fail)
 
-    def test_empty_conditions(self, mock_element: Any) -> None:
-        """satisfy_all with no conditions passes vacuously."""
-        satisfy_all(mock_element)
+    def test_empty_conditions_raises(self, mock_element: Any) -> None:
+        """satisfy_all with no conditions raises ValueError.
+
+        Regression: previously passed vacuously (all([]) is True),
+        hiding user errors where conditions were forgotten.
+        """
+        with pytest.raises(ValueError, match="at least one condition"):
+            satisfy_all(mock_element)
 
 
 class TestSatisfyAny:
@@ -68,9 +73,13 @@ class TestSatisfyAny:
         with pytest.raises(AssertionError, match="to_satisfy_any"):
             satisfy_any(mock_element, _always_fail, _always_fail)
 
-    def test_empty_conditions(self, mock_element: Any) -> None:
-        """satisfy_any with no conditions raises (none passed)."""
-        with pytest.raises(AssertionError, match="to_satisfy_any"):
+    def test_empty_conditions_raises(self, mock_element: Any) -> None:
+        """satisfy_any with no conditions raises ValueError.
+
+        Regression: previously raised AssertionError with empty actual
+        value, which was confusing. Now fails fast with a clear message.
+        """
+        with pytest.raises(ValueError, match="at least one condition"):
             satisfy_any(mock_element)
 
 
@@ -89,9 +98,14 @@ class TestSatisfyNone:
         with pytest.raises(AssertionError, match="to_satisfy_none"):
             satisfy_none(mock_element, _always_pass, _always_pass)
 
-    def test_empty_conditions(self, mock_element: Any) -> None:
-        """satisfy_none with no conditions passes vacuously."""
-        satisfy_none(mock_element)
+    def test_empty_conditions_raises(self, mock_element: Any) -> None:
+        """satisfy_none with no conditions raises ValueError.
+
+        Regression: previously passed vacuously (none of empty set is
+        True), hiding user errors where conditions were forgotten.
+        """
+        with pytest.raises(ValueError, match="at least one condition"):
+            satisfy_none(mock_element)
 
 
 class TestAssertionMixinIntegration:
@@ -121,3 +135,98 @@ class TestAssertionMixinIntegration:
         """expect(el).to_satisfy_none raises when cond passes."""
         with pytest.raises(AssertionError, match="to_satisfy_none"):
             expect(mock_element).to_satisfy_none(_always_pass)
+
+
+class TestCompositionSoftMode:
+    """Regression tests for composition + soft_mode interaction.
+
+    Bug: to_satisfy_all/any/none bypassed _run_assertion, so soft_mode
+    had no effect — AssertionError was raised immediately instead of
+    being collected.
+    """
+
+    def test_satisfy_all_soft_failure_collected(self, mock_element: Any) -> None:
+        """to_satisfy_all failure in soft mode is collected, not raised."""
+        from selenium_expect import SoftAssertionCollector, assert_all
+
+        SoftAssertionCollector.reset()
+        expect(mock_element, soft=True).to_satisfy_all(_is_visible, _is_selected)
+
+        failures = SoftAssertionCollector.get_failures()
+        assert len(failures) == 1
+        assert "to_satisfy_all" in failures[0]
+
+        with pytest.raises(AssertionError, match="Soft assertion failures"):
+            assert_all()
+
+    def test_satisfy_any_soft_failure_collected(self, mock_element: Any) -> None:
+        """to_satisfy_any failure in soft mode is collected, not raised."""
+        from selenium_expect import SoftAssertionCollector, assert_all
+
+        SoftAssertionCollector.reset()
+        expect(mock_element, soft=True).to_satisfy_any(_always_fail, _always_fail)
+
+        failures = SoftAssertionCollector.get_failures()
+        assert len(failures) == 1
+        assert "to_satisfy_any" in failures[0]
+
+        with pytest.raises(AssertionError, match="Soft assertion failures"):
+            assert_all()
+
+    def test_satisfy_none_soft_failure_collected(self, mock_element: Any) -> None:
+        """to_satisfy_none failure in soft mode is collected, not raised."""
+        from selenium_expect import SoftAssertionCollector, assert_all
+
+        SoftAssertionCollector.reset()
+        expect(mock_element, soft=True).to_satisfy_none(_always_pass)
+
+        failures = SoftAssertionCollector.get_failures()
+        assert len(failures) == 1
+        assert "to_satisfy_none" in failures[0]
+
+        with pytest.raises(AssertionError, match="Soft assertion failures"):
+            assert_all()
+
+    def test_satisfy_all_soft_pass_not_collected(self, mock_element: Any) -> None:
+        """to_satisfy_all pass in soft mode does not add failures."""
+        from selenium_expect import SoftAssertionCollector
+
+        SoftAssertionCollector.reset()
+        expect(mock_element, soft=True).to_satisfy_all(_is_visible, _is_enabled)
+        assert len(SoftAssertionCollector.get_failures()) == 0
+
+
+class TestCompositionNegation:
+    """Regression tests for composition + negation interaction.
+
+    Bug: not_.to_satisfy_all/any/none did not negate because the
+    composition functions were called directly without checking
+    self._negate.
+    """
+
+    def test_not_satisfy_all_passes_when_one_fails(self, mock_element: Any) -> None:
+        """not_.to_satisfy_all passes when not all conditions pass."""
+        expect(mock_element).not_.to_satisfy_all(_is_visible, _is_selected)
+
+    def test_not_satisfy_all_fails_when_all_pass(self, mock_element: Any) -> None:
+        """not_.to_satisfy_all raises when all conditions pass."""
+        with pytest.raises(AssertionError, match="not to_satisfy_all"):
+            expect(mock_element).not_.to_satisfy_all(_is_visible, _is_enabled)
+
+    def test_not_satisfy_any_passes_when_all_fail(self, mock_element: Any) -> None:
+        """not_.to_satisfy_any passes when all conditions fail."""
+        expect(mock_element).not_.to_satisfy_any(_always_fail, _always_fail)
+
+    def test_not_satisfy_any_fails_when_one_passes(self, mock_element: Any) -> None:
+        """not_.to_satisfy_any raises when at least one passes."""
+        with pytest.raises(AssertionError, match="not to_satisfy_any"):
+            expect(mock_element).not_.to_satisfy_any(_is_selected, _is_visible)
+
+    def test_not_satisfy_none_passes_when_one_passes(self, mock_element: Any) -> None:
+        """not_.to_satisfy_none passes when at least one condition passes."""
+        expect(mock_element).not_.to_satisfy_none(_always_pass)
+
+    def test_not_satisfy_none_fails_when_all_fail(self, mock_element: Any) -> None:
+        """not_.to_satisfy_none raises when no condition passes."""
+        with pytest.raises(AssertionError, match="not to_satisfy_none"):
+            expect(mock_element).not_.to_satisfy_none(_always_fail)
