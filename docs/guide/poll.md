@@ -108,3 +108,80 @@ from selenium_expect import poll
 
 poll(lambda: driver.execute_script("return document.readyState"), timeout=10).to_equal("complete")
 ```
+
+## More examples
+
+### Waiting for an API call to complete
+
+```python
+# Poll a JavaScript variable that's set when an API call finishes
+expect.poll(
+    lambda: driver.execute_script("return window.apiResponse?.status"),
+    timeout=30,
+    polling=0.5,
+).to_equal("success")
+```
+
+### Waiting for a specific number of elements
+
+```python
+from selenium.webdriver.common.by import By
+
+# Wait until at least 10 search results are loaded
+expect.poll(
+    lambda: len(driver.find_elements(By.CSS_SELECTOR, ".search-result")),
+    timeout=15,
+).to_be_greater_than(9)
+```
+
+### Waiting for a URL to match a pattern
+
+```python
+import re
+
+# Wait for a redirect to complete
+expect.poll(lambda: driver.current_url).to_match(r"https://app\.example\.com/dashboard")
+```
+
+### Waiting for a cookie to be set
+
+```python
+# Wait for a cookie to appear
+expect.poll(
+    lambda: driver.get_cookie("auth_token"),
+    timeout=10,
+).to_be_truthy()
+```
+
+### Waiting for page to be fully loaded
+
+```python
+# Wait for document.readyState to be 'complete'
+expect.poll(
+    lambda: driver.execute_script("return document.readyState"),
+    timeout=30,
+    polling=[0.1, 0.2, 0.5, 1.0],
+).to_equal("complete")
+
+# Also verify no pending AJAX requests (jQuery)
+expect.poll(
+    lambda: driver.execute_script("return jQuery.active"),
+    timeout=10,
+).to_equal(0)
+```
+
+### Negation with poll
+
+```python
+# Wait until a loading flag is falsy
+expect.poll(
+    lambda: driver.execute_script("return window.isLoading"),
+    timeout=15,
+).to_be_falsy()
+
+# Wait until there are no error elements
+expect.poll(
+    lambda: len(driver.find_elements(By.CLASS_NAME, "error")),
+    timeout=10,
+).to_be_less_than(1)
+```

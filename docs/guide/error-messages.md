@@ -69,3 +69,67 @@ set_screenshot_on_failure(True, path="./screenshots/")
 ```
 
 Screenshots are saved as `screenshot_{timestamp}_{condition}.png`.
+
+## Examples
+
+### Understanding the timeline
+
+The timeline shows the last 5 poll results, which helps diagnose intermittent issues:
+
+```text
+Expected <span id="status"> to have text 'Ready', but got Loading
+  Expected: Ready
+  Actual:   Loading
+  Element:  <span id="status">Loading</span>
+  Waited:   5001ms (10 polls at 0.5s interval)
+  Timeline: [poll 6: Loading, poll 7: Loading, poll 8: Loading, poll 9: Loading, poll 10: Loading]
+```
+
+If the value was changing during the wait, the timeline would show it:
+
+```text
+Expected <span id="status"> to have text 'Ready', but got Loading
+  Expected: Ready
+  Actual:   Loading
+  Element:  <span id="status">Loading</span>
+  Waited:   5001ms (10 polls at 0.5s interval)
+  Timeline: [poll 6: Pending, poll 7: Loading, poll 8: Loading, poll 9: Loading, poll 10: Loading]
+```
+
+### Using custom messages for context
+
+```python
+# Add context to error messages
+expect(
+    driver.find_element(By.ID, "checkout-btn"),
+    message="Checkout button should be enabled after cart has items"
+).to_be_enabled()
+
+expect(
+    driver,
+    message="Should redirect to dashboard after login"
+).to_have_url_contains("/dashboard")
+```
+
+### Debug mode output
+
+When debug mode is enabled, each poll prints details:
+
+```text
+[selenium_expect] poll 1/10: to be visible → False (elapsed: 0ms)
+[selenium_expect] poll 2/10: to be visible → False (elapsed: 501ms)
+[selenium_expect] poll 3/10: to be visible → True (elapsed: 1002ms)
+```
+
+### Screenshots on failure
+
+```python
+from selenium_expect import set_screenshot_on_failure
+
+# Enable with a custom path
+set_screenshot_on_failure(True, path="./screenshots/")
+
+# Now any assertion failure saves a screenshot
+expect(element).to_be_visible(timeout=5)
+# If this fails, you'll find: ./screenshots/screenshot_20240101_120000_to_be_visible.png
+```

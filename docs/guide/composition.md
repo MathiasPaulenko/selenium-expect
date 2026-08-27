@@ -79,3 +79,55 @@ expect(element, message="Submit button validation").to_satisfy_all(
     lambda el: expect(el).to_have_text("Submit"),
 )
 ```
+
+## More examples
+
+### Validating a form field with multiple conditions
+
+```python
+def test_email_field(driver):
+    email = driver.find_element(By.ID, "email")
+
+    expect(email).to_satisfy_all(
+        lambda el: expect(el).to_be_visible(),
+        lambda el: expect(el).to_be_enabled(),
+        lambda el: expect(el).to_have_attribute("type", "email"),
+        lambda el: expect(el).to_have_attribute("placeholder", "Enter your email"),
+        lambda el: expect(el).to_have_value(""),
+    )
+```
+
+### Checking for one of several valid states
+
+```python
+def test_order_status(driver):
+    status = driver.find_element(By.ID, "order-status")
+
+    # Status should be one of these values
+    expect(status).to_satisfy_any(
+        lambda el: expect(el).to_have_text("Processing"),
+        lambda el: expect(el).to_have_text("Shipped"),
+        lambda el: expect(el).to_have_text("Delivered"),
+    )
+```
+
+### Ensuring none of the error states are present
+
+```python
+def test_no_errors(driver):
+    expect(driver.find_element(By.ID, "notification")).to_satisfy_none(
+        lambda el: expect(el).to_have_text("Error"),
+        lambda el: expect(el).to_have_text("Failed"),
+        lambda el: expect(el).to_have_text("Timeout"),
+    )
+```
+
+### Using with locator-based expect
+
+```python
+expect(driver, by=By.ID, value="submit-btn").to_satisfy_all(
+    lambda el: expect(el).to_be_visible(),
+    lambda el: expect(el).to_be_enabled(),
+    lambda el: expect(el).to_have_text("Submit"),
+)
+```

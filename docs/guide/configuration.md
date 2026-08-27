@@ -100,3 +100,79 @@ The immutable `ExpectConfig` dataclass holds all settings:
 | `soft_mode` | `bool` | `False` | Soft assertion mode |
 
 Use `config.replace(**kwargs)` to create a new instance with overridden fields.
+
+## Examples
+
+### Setting up a test suite
+
+```python
+# conftest.py
+import pytest
+from selenium_expect import (
+    set_default_timeout,
+    set_default_polling_interval,
+    set_screenshot_on_failure,
+    set_debug_mode,
+)
+
+def pytest_configure(config):
+    # Global defaults for all tests
+    set_default_timeout(10)
+    set_default_polling_interval(0.25)
+
+    # Capture screenshots on failure
+    set_screenshot_on_failure(True, path="./test_screenshots/")
+
+    # Enable debug mode in CI
+    if config.getoption("--ci"):
+        set_debug_mode(True)
+```
+
+### Using backoff for slow pages
+
+```python
+from selenium_expect import set_default_polling_intervals
+
+# Poll frequently at first, then back off for slow-loading pages
+set_default_polling_intervals([0.1, 0.2, 0.2, 0.5, 0.5, 1.0, 1.0])
+```
+
+### Pre-configured variants for different scenarios
+
+```python
+from selenium_expect import expect
+
+# Fast checks for quick assertions (e.g., UI state after click)
+fast = expect.configure(timeout=2.0, polling=0.1)
+
+# Patient checks for slow operations (e.g., page navigation, API calls)
+patient = expect.configure(timeout=30.0, polling=0.5)
+
+# Debug variant with screenshots
+debug = expect.configure(
+    timeout=10.0,
+    polling=0.25,
+    screenshot_on_failure=True,
+    screenshot_path="./debug_screens/",
+)
+
+# Use them in tests
+def test_quick_check(driver):
+    fast(driver.find_element(By.ID, "btn")).to_be_visible()
+
+def test_slow_page_load(driver):
+    patient(driver).to_have_title("Dashboard", timeout=60)
+```
+
+### Combining global and per-assertion overrides
+
+```python
+# Global default: 10s timeout, 0.25s polling
+set_default_timeout(10)
+set_default_polling_interval(0.25)
+
+# Per-assertion: override for a specific check
+expect(element).to_be_visible(timeout=2, polling=0.05)  # quick check
+expect(driver).to_have_title("Loaded", timeout=60)      # patient check
+expect(element).to_have_text("Ready", polling=[0.1, 0.2, 0.5])  # backoff
+```

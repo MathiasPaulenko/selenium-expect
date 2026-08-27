@@ -76,3 +76,62 @@ def test_form_validation(driver):
 
     assert_all()
 ```
+
+## Pattern: soft assertions with pytest
+
+```python
+import pytest
+from selenium_expect import expect, assert_all, SoftAssertionCollector
+from selenium.webdriver.common.by import By
+
+@pytest.fixture(autouse=True)
+def reset_soft_assertions():
+    SoftAssertionCollector.reset()
+    yield
+
+def test_profile_page(driver):
+    driver.get("https://app.example.com/profile")
+
+    # All assertions run even if some fail
+    expect(driver).to_have_title("Profile", soft=True)
+    expect(driver.find_element(By.ID, "name")).to_have_text("John Doe", soft=True)
+    expect(driver.find_element(By.ID, "email")).to_have_text_contains("john", soft=True)
+    expect(driver.find_element(By.ID, "avatar")).to_be_visible(soft=True)
+    expect(driver.find_element(By.ID, "edit-btn")).to_be_clickable(soft=True)
+
+    # Raise if any failed
+    assert_all()
+```
+
+## Pattern: mixing soft and hard assertions
+
+```python
+def test_checkout(driver):
+    # Hard assertion — stops immediately if this fails
+    expect(driver).to_have_url_contains("/checkout")
+
+    # Soft assertions — collect all failures
+    expect(driver.find_element(By.ID, "total")).to_have_text("$99.99", soft=True)
+    expect(driver.find_element(By.ID, "item-count")).to_have_text("3 items", soft=True)
+    expect(driver.find_element(By.ID, "shipping")).to_have_text("Free", soft=True)
+
+    assert_all()
+```
+
+## Pattern: soft assertions with pre-configured expect
+
+```python
+from selenium_expect import expect
+
+# Create a soft expect variant
+soft_expect = expect.configure(soft=True)
+
+def test_dashboard(driver):
+    # All assertions are soft by default
+    soft_expect(driver).to_have_title("Dashboard")
+    soft_expect(driver.find_element(By.ID, "welcome")).to_have_text_contains("Welcome")
+    soft_expect(driver.find_element(By.ID, "stats")).to_be_visible()
+
+    # Check all at once
+    assert_all()
+```
