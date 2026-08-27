@@ -1209,3 +1209,188 @@ Asserts that `element.shadow_root` is `None`.
 ```python
 expect(element).to_have_shadow_root_absent()
 ```
+
+## Tips and common patterns
+
+### Waiting for an element to appear/disappear
+
+```python
+from selenium.webdriver.common.by import By
+
+# Wait for a loading spinner to appear
+expect(driver, by=By.ID, value="loading-spinner").to_be_visible(timeout=5)
+
+# Wait for the spinner to disappear
+expect(driver, by=By.ID, value="loading-spinner").to_be_hidden(timeout=30)
+
+# Or use negation
+expect(driver, by=By.ID, value="loading-spinner").not_.to_be_visible(timeout=30)
+```
+
+### Verifying form field state
+
+```python
+# Check that a field is editable (input/textarea, not readonly, not disabled)
+expect(driver.find_element(By.ID, "email")).to_be_editable()
+
+# Check that a field is readonly
+expect(driver.find_element(By.ID, "user-id")).to_be_readonly()
+
+# Check that a checkbox is checked
+expect(driver.find_element(By.ID, "agree-terms")).to_be_checked()
+
+# Check that a checkbox is unchecked
+expect(driver.find_element(By.ID, "newsletter-opt-in")).to_be_unchecked()
+```
+
+### Verifying dynamic text content
+
+```python
+# Exact match
+expect(status_element).to_have_text("Ready")
+
+# Partial match — useful when text includes dynamic values
+expect(status_element).to_have_text_contains("Welcome,")
+
+# Regex match — for patterns like "Order #12345"
+expect(order_element).to_have_text_matches(r"Order #\d+")
+
+# Text starts with a prefix
+expect(breadcrumb).to_have_text_starting_with("Home")
+
+# Text ends with a suffix
+expect(price_element).to_have_text_ending_with("USD")
+
+# Text is one of several known values
+expect(status_badge).to_have_text_in_list("Active", "Pending", "Completed")
+```
+
+### Working with element attributes
+
+```python
+# Exact attribute match
+expect(link).to_have_attribute("href", "https://example.com/page")
+
+# Attribute contains a substring
+expect(link).to_have_attribute_contains("href", "example.com")
+
+# Attribute matches a regex
+expect(link).to_have_attribute_matches("href", r"https://[\w.-]+\.com")
+
+# Attribute is present (e.g., required, disabled)
+expect(input_field).to_have_attribute_present("required")
+
+# Attribute is absent
+expect(input_field).to_have_attribute_absent("disabled")
+
+# Attribute is empty
+expect(input_field).to_have_attribute_empty("data-value")
+
+# Attribute is one of several values
+expect(button).to_have_attribute_in_list("type", ["submit", "button"])
+```
+
+### Verifying CSS properties
+
+```python
+# Exact CSS value
+expect(banner).to_have_css_property("display", "block")
+
+# CSS value contains a substring
+expect(banner).to_have_css_property_contains("color", "255")
+
+# CSS value matches a regex
+expect(banner).to_have_css_property_matches("color", r"rgba?\(\s*255")
+```
+
+### Checking element identity
+
+```python
+# Verify the tag name
+expect(element).to_have_tag("button")
+
+# Verify the element ID
+expect(element).to_have_id("submit-btn")
+
+# Verify a specific class is present
+expect(element).to_have_class("active")
+
+# Verify multiple classes are all present
+expect(element).to_have_all_classes("btn", "btn-primary", "active")
+
+# Verify at least one class from a list is present
+expect(element).to_have_class_in_list("btn-primary", "btn-secondary")
+
+# Class matches a regex pattern
+expect(element).to_have_class_matching(r"btn-\w+")
+```
+
+### Position and dimensions
+
+```python
+# Exact location
+expect(element).to_have_location(100, 200)
+
+# Only check x or y
+expect(element).to_have_location_x(100)
+expect(element).to_have_location_y(200)
+
+# Exact size
+expect(element).to_have_size(300, 50)
+
+# Only check width or height
+expect(element).to_have_size_width(300)
+expect(element).to_have_size_height(50)
+
+# Full rect (position + size)
+expect(element).to_have_rect(100, 200, 300, 50)
+
+# Location is greater than given values
+expect(element).to_have_location_greater_than(x=50, y=50)
+
+# Size is less than given values
+expect(element).to_have_size_less_than(width=500, height=200)
+
+# Location after scrolling into view
+expect(element).to_have_location_once_scrolled_into_view(0, 0)
+```
+
+### Accessibility assertions
+
+```python
+# Verify ARIA role
+expect(button).to_have_aria_role("button")
+expect(nav).to_have_aria_role("navigation")
+
+# ARIA role contains a substring
+expect(element).to_have_aria_role_contains("menu")
+
+# ARIA role is one of several
+expect(element).to_have_aria_role_in_list("button", "link", "menuitem")
+
+# Accessible name
+expect(button).to_have_accessible_name("Submit Form")
+expect(button).to_have_accessible_name_contains("Submit")
+```
+
+### Detecting stale elements
+
+```python
+# After a page refresh or DOM update, verify the element is stale
+old_element = driver.find_element(By.ID, "dynamic-content")
+driver.navigate().refresh()
+expect(old_element).to_be_stale(timeout=5)
+
+# Or verify an element is no longer present in the DOM
+expect(old_element).to_be_absent(timeout=5)
+```
+
+### Chaining element assertions
+
+```python
+# Verify visibility, text, and clickability in one chain
+expect(submit_btn).to_be_visible().to_have_text("Submit").to_be_clickable()
+
+# Verify attributes and classes
+expect(card).to_have_attribute("data-id", "42").to_have_class("card").to_have_class("active")
+```

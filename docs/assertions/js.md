@@ -236,3 +236,80 @@ Asserts that `sessionStorage.length` equals `length`.
 ```python
 expect(driver).to_have_session_storage_length(2)
 ```
+
+## Tips and common patterns
+
+### Asserting on JavaScript execution results
+
+```python
+# Verify a JS expression returns a specific value
+expect(driver).to_have_js_result("document.title", "Dashboard")
+
+# Verify a JS expression returns a value containing a substring
+expect(driver).to_have_js_result_contains("document.title", "Dash")
+
+# Verify an async JS expression
+expect(driver).to_have_async_js_result(
+    "return await fetch('/api/status').then(r => r.json()).then(d => d.status)",
+    "ok",
+    timeout=10,
+)
+
+# Verify a JS variable value
+expect(driver).to_have_js_variable("window.appVersion", "2.0.0")
+```
+
+### Working with localStorage
+
+```python
+# Verify a localStorage item exists
+expect(driver).to_have_local_storage_item_present("authToken")
+
+# Verify a localStorage item's value
+expect(driver).to_have_local_storage_item("authToken", "abc123")
+
+# Verify a localStorage item is absent
+expect(driver).to_have_local_storage_item_absent("oldToken")
+
+# Verify the number of localStorage items
+expect(driver).to_have_local_storage_length(3)
+```
+
+### Working with sessionStorage
+
+```python
+# Verify a sessionStorage item exists
+expect(driver).to_have_session_storage_item_present("tempData")
+
+# Verify a sessionStorage item's value
+expect(driver).to_have_session_storage_item("tempData", '{"page":1}')
+
+# Verify a sessionStorage item is absent
+expect(driver).to_have_session_storage_item_absent("clearedData")
+
+# Verify the number of sessionStorage items
+expect(driver).to_have_session_storage_length(2)
+```
+
+### Negation
+
+```python
+# JS result is NOT "loading"
+expect(driver).not_.to_have_js_result("document.readyState", "loading")
+
+# localStorage item is NOT present
+expect(driver).not_.to_have_local_storage_item_present("oldToken")
+
+# sessionStorage does NOT have 10 items
+expect(driver).not_.to_have_session_storage_length(10)
+```
+
+### Real-world example — verifying SPA state
+
+```python
+# After a SPA navigates, verify the app state in localStorage
+expect(driver).to_have_local_storage_item("currentRoute", "/dashboard")
+expect(driver).to_have_local_storage_item_present("authToken")
+expect(driver).to_have_js_variable("window.app.state", "loaded")
+expect(driver).to_have_js_result("document.querySelector('#app').getAttribute('data-loaded')", "true")
+```

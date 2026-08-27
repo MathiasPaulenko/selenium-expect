@@ -112,3 +112,48 @@ Asserts that `shadow_root.find_element(by, value).is_displayed()` is `True`.
 ```python
 expect(shadow).to_have_element_visible(By.CSS_SELECTOR, "button")
 ```
+
+## Tips and common patterns
+
+### Working with shadow DOM elements
+
+```python
+from selenium.webdriver.common.by import By
+
+# Find the host element and get its shadow root
+host = driver.find_element(By.CSS_SELECTOR, "my-widget")
+shadow = host.shadow_root
+
+# Verify the shadow root exists
+expect(host).to_have_shadow_root()
+
+# Verify elements inside the shadow DOM
+expect(shadow).to_have_element(By.CSS_SELECTOR, "button")
+expect(shadow).to_have_element_count(By.CSS_SELECTOR, "li", 5)
+expect(shadow).to_have_element_text(By.CSS_SELECTOR, "span", "Hello")
+expect(shadow).to_have_element_attribute(By.CSS_SELECTOR, "input", "type", "text")
+expect(shadow).to_have_element_visible(By.CSS_SELECTOR, "button")
+```
+
+### Verifying shadow root absence
+
+```python
+# Verify an element does NOT have a shadow root
+expect(element).to_have_shadow_root_absent()
+
+# Or use negation
+expect(element).not_.to_have_shadow_root()
+```
+
+### Negation with shadow DOM
+
+```python
+# Element is NOT in the shadow DOM
+expect(shadow).not_.to_have_element(By.CSS_SELECTOR, ".hidden-element")
+
+# Shadow DOM does NOT have 10 elements
+expect(shadow).not_.to_have_element_count(By.CSS_SELECTOR, "li", 10)
+
+# Element in shadow DOM is NOT visible
+expect(shadow).not_.to_have_element_visible(By.CSS_SELECTOR, ".hidden")
+```

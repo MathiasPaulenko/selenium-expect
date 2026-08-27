@@ -66,3 +66,61 @@ Asserts that the window rect matches all four values.
 ```python
 expect(driver).to_have_rect(0, 0, 1280, 800)
 ```
+
+## Tips and common patterns
+
+### Setting and verifying window size
+
+```python
+# Set the window size
+driver.set_window_size(1920, 1080)
+
+# Verify it was set correctly
+expect(driver).to_have_size(1920, 1080)
+```
+
+### Setting and verifying window position
+
+```python
+# Move the window to the top-left corner
+driver.set_window_position(0, 0)
+
+# Verify the position
+expect(driver).to_have_position(0, 0)
+```
+
+### Verifying full window rect
+
+```python
+# Set position and size together
+driver.set_window_rect(100, 100, 1280, 720)
+
+# Verify all four values
+expect(driver).to_have_rect(100, 100, 1280, 720)
+```
+
+### Negation
+
+```python
+# Window is NOT at position (0, 0)
+expect(driver).not_.to_have_position(0, 0)
+
+# Window is NOT 800x600
+expect(driver).not_.to_have_size(800, 600)
+```
+
+### Using with window management
+
+```python
+# After maximizing the window
+driver.maximize_window()
+
+# Verify the window is no longer small
+expect(driver).not_.to_have_size(800, 600)
+
+# After switching to a new window
+driver.switch_to.window(driver.window_handles[1])
+
+# Verify the new window's size
+expect(driver).to_have_size(1024, 768)
+```

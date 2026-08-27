@@ -110,3 +110,54 @@ Asserts that the driver is in the default content (not inside a frame).
 driver.switch_to.default_content()
 expect(driver).to_be_in_default_content()
 ```
+
+## Tips and common patterns
+
+### Working with iframes
+
+```python
+from selenium.webdriver.common.by import By
+
+# Verify an iframe is available on the page
+expect(driver).to_have_frame_available(By.ID, "content-frame", timeout=10)
+
+# Verify the number of iframes
+expect(driver).to_have_frame_count(3)
+expect(driver).to_have_frame_count_greater_than(0)
+
+# Verify iframe text content
+expect(driver).to_have_frame_text(By.ID, "content-frame", "Welcome")
+```
+
+### Switching to an iframe and back
+
+```python
+# Switch to an iframe
+driver.switch_to.frame("content-frame")
+
+# Verify we're in the iframe context
+expect(driver).to_be_in_frame()
+
+# Perform assertions inside the iframe
+heading = driver.find_element(By.TAG_NAME, "h1")
+expect(heading).to_have_text("Welcome")
+
+# Switch back to the main document
+driver.switch_to.default_content()
+
+# Verify we're back in the default content
+expect(driver).to_be_in_default_content()
+```
+
+### Negation
+
+```python
+# Iframe is NOT available
+expect(driver).not_.to_have_frame_available(By.ID, "removed-frame")
+
+# We are NOT in an iframe
+expect(driver).not_.to_be_in_frame()
+
+# There are NOT 5 iframes
+expect(driver).not_.to_have_frame_count(5)
+```

@@ -226,3 +226,57 @@ Asserts that `driver.get_cookie(name)["expiry"]` equals `expiry`.
 ```python
 expect(driver).to_have_cookie_expiry("session_id", 1735689600)
 ```
+
+## Tips and common patterns
+
+### Verifying session cookies
+
+```python
+# After login, verify the session cookie was set
+expect(driver).to_have_cookie("session_id")
+expect(driver).to_have_cookie_value("session_id", "abc123")
+
+# Verify the session cookie is secure and HttpOnly
+expect(driver).to_have_cookie_secure("session_id")
+expect(driver).to_have_cookie_http_only("session_id")
+
+# Verify SameSite attribute
+expect(driver).to_have_cookie_same_site("session_id", "Lax")
+```
+
+### Checking cookie count
+
+```python
+# Verify exactly 3 cookies are set
+expect(driver).to_have_cookie_count(3)
+
+# Verify at least 1 cookie exists
+expect(driver).to_have_cookie_count_greater_than(0)
+
+# Verify no cookies are set (e.g., after clearing)
+driver.delete_all_cookies()
+expect(driver).to_have_no_cookies()
+```
+
+### Verifying cookie domain and path
+
+```python
+# Check the cookie domain
+expect(driver).to_have_cookie_domain("session_id", ".example.com")
+
+# Check the cookie path
+expect(driver).to_have_cookie_path("session_id", "/")
+```
+
+### Negation
+
+```python
+# Cookie does NOT exist
+expect(driver).not_.to_have_cookie("deleted_cookie")
+
+# Cookie value is NOT "old_value"
+expect(driver).not_.to_have_cookie_value("session_id", "old_value")
+
+# Cookie is NOT secure
+expect(driver).not_.to_have_cookie_secure("tracking_id")
+```

@@ -273,3 +273,83 @@ Asserts that the select is a single-select (`select.is_multiple` is `False`).
 ```python
 expect(select).to_be_single_select()
 ```
+
+## Tips and common patterns
+
+### Working with single-select dropdowns
+
+```python
+from selenium.webdriver.support.ui import Select
+
+select = Select(driver.find_element(By.ID, "country"))
+
+# Verify the selected value
+expect(select).to_have_value("us")
+expect(select).to_have_first_selected_value("us")
+
+# Verify the selected text
+expect(select).to_have_selected_text("United States")
+
+# Verify the selected index
+expect(select).to_have_selected_index(0)
+
+# Verify it's a single-select
+expect(select).to_be_single_select()
+
+# Verify no selection
+expect(select).to_have_no_selection()
+```
+
+### Working with multi-select dropdowns
+
+```python
+select = Select(driver.find_element(By.ID, "tags"))
+
+# Verify it's a multi-select
+expect(select).to_be_multiple()
+
+# Verify multiple selected values
+expect(select).to_have_selected_values("python", "selenium")
+
+# Verify multiple selected texts
+expect(select).to_have_selected_texts("Python", "Selenium")
+
+# Verify the number of selected options
+expect(select).to_have_selected_count(2)
+```
+
+### Verifying dropdown options
+
+```python
+select = Select(driver.find_element(By.ID, "color"))
+
+# Verify total option count
+expect(select).to_have_option_count(5)
+
+# Verify at least 3 options
+expect(select).to_have_option_count_greater_than(2)
+
+# Verify a specific option exists
+expect(select).to_have_option("red")
+expect(select).to_have_option_text("Red")
+
+# Verify option at a specific index
+expect(select).to_have_option_at_index(0, "red")
+expect(select).to_have_option_at_index(1, "blue")
+```
+
+### Negation
+
+```python
+# Select does NOT have value "old_value"
+expect(select).not_.to_have_value("old_value")
+
+# Select is NOT multiple
+expect(select).not_.to_be_multiple()
+
+# Select does NOT have 10 options
+expect(select).not_.to_have_option_count(10)
+
+# "red" is NOT an option
+expect(select).not_.to_have_option("red")
+```

@@ -22,10 +22,24 @@ Asserts that the page title equals `title`.
 expect(driver).to_have_title("Dashboard - My App")
 ```
 
+With a custom timeout:
+
+```python
+expect(driver).to_have_title("Dashboard - My App", timeout=15)
+```
+
 **Negation**:
 
 ```python
 expect(driver).not_.to_have_title("Loading...")
+```
+
+**Real-world example** — waiting for a SPA to finish loading:
+
+```python
+driver.get("https://app.example.com/dashboard")
+# SPA frameworks update the title after JS loads
+expect(driver).to_have_title("Dashboard | Example App", timeout=20)
 ```
 
 ---
@@ -485,4 +499,94 @@ Asserts that the active element has `class_name` in its class list.
 
 ```python
 expect(driver).to_have_active_element_class("focused")
+```
+
+## Tips and common patterns
+
+### Waiting for page load
+
+```python
+# Wait for the page to finish loading
+expect(driver).to_have_ready_state("complete", timeout=30)
+
+# Then verify the title
+expect(driver).to_have_title("Dashboard")
+```
+
+### Verifying a redirect
+
+```python
+# Navigate to a page that should redirect
+driver.get("https://app.example.com/old-page")
+
+# Wait for the URL to change
+expect(driver).to_have_url("https://app.example.com/new-page", timeout=10)
+
+# Or check that the URL has changed from the original
+expect(driver).to_have_url_changes("https://app.example.com/old-page", timeout=10)
+```
+
+### Working with multiple windows/tabs
+
+```python
+# Store current handles before clicking a link that opens a new window
+original_handles = driver.window_handles
+driver.find_element(By.LINK_TEXT, "Open in new tab").click()
+
+# Wait for the new window to appear
+expect(driver).to_have_new_window_opened(original_handles, timeout=10)
+
+# Switch to the new window
+new_handles = [h for h in driver.window_handles if h not in original_handles]
+driver.switch_to.window(new_handles[0])
+
+# Assert on the new window
+expect(driver).to_have_title("New Window Title")
+```
+
+### Chaining driver assertions
+
+```python
+# Chain multiple page-level checks
+expect(driver).to_have_title("Dashboard").to_have_url_contains("/dashboard").to_have_ready_state("complete")
+```
+
+### Checking browser capabilities
+
+```python
+# Verify the browser supports headless mode
+expect(driver).to_have_capability("browserName", "chrome")
+
+# Check a specific capability value
+expect(driver).to_have_capability("platformName", "linux")
+
+# Check that a capability contains a value
+expect(driver).to_have_capability_contains("browserVersion", "120")
+```
+
+### Verifying page source content
+
+```python
+# Check that specific text appears in the page source
+expect(driver).to_have_page_source_contains("Copyright 2024")
+
+# Use regex for more flexible matching
+expect(driver).to_have_page_source_matches(r"User ID:\s*\d+")
+
+# Verify text is NOT in the page source
+expect(driver).to_have_page_source_not_contains("Error:")
+```
+
+### Active element assertions
+
+```python
+# After clicking a field, verify it's focused
+driver.find_element(By.ID, "username").click()
+expect(driver).to_have_active_element_id("username")
+expect(driver).to_have_active_element_tag("input")
+
+# After Tab navigation, verify the next field is focused
+from selenium.webdriver.common.keys import Keys
+driver.find_element(By.ID, "username").send_keys(Keys.TAB)
+expect(driver).to_have_active_element_id("password")
 ```
