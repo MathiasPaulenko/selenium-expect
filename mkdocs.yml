@@ -1,5 +1,5 @@
 site_name: selenium-expect
-site_description: Playwright-style expect() for Selenium Python
+site_description: Fluent expect() assertions with auto-retry for Selenium Python
 site_author: Mathias Paulenko
 site_url: https://mathiaspaulenko.github.io/selenium-expect/
 repo_url: https://github.com/MathiasPaulenko/selenium-expect

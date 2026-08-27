@@ -1,6 +1,6 @@
 # selenium-expect
 
-Playwright-style `expect()` assertions with auto-retry for Selenium Python. Standalone, no framework required.
+Fluent `expect()` assertions with auto-retry for Selenium Python. Standalone, no framework required.
 
 [![CI](https://github.com/MathiasPaulenko/selenium-expect/actions/workflows/ci.yml/badge.svg)](https://github.com/MathiasPaulenko/selenium-expect/actions/workflows/ci.yml)
 [![PyPI](https://img.shields.io/pypi/v/selenium-expect.svg)](https://pypi.org/project/selenium-expect/)
@@ -29,7 +29,7 @@ Playwright-style `expect()` assertions with auto-retry for Selenium Python. Stan
 
 ## Why?
 
-Selenium's `WebDriverWait` + `expected_conditions` is verbose and inconsistent. Playwright's `expect()` is ergonomic and auto-retries. **selenium-expect** brings that experience to Selenium Python:
+Selenium's `WebDriverWait` + `expected_conditions` is verbose and inconsistent. **selenium-expect** provides an ergonomic, auto-retrying `expect()` API for Selenium Python:
 
 ```python
 from selenium import webdriver
@@ -559,10 +559,10 @@ expect(element).to_satisfy_none(
 
 ## Comparison
 
-| Feature | selenium-expect | WebDriverWait + EC | Playwright expect | Selenium IDE |
+| Feature | selenium-expect | WebDriverWait + EC | Selenium IDE |
 |---|---|---|---|---|
-| Auto-retry | Yes | Yes (explicit) | Yes | No |
-| Fluent API | Yes | No | Yes | No |
+| Auto-retry | Yes | Yes (explicit) | No |
+| Fluent API | Yes | No | No |
 | Negation | Yes (`.not_`) | Manual | Yes (`.not_`) | No |
 | Soft assertions | Yes | No | No | No |
 | Custom matchers | Yes | No | Yes | No |
@@ -572,11 +572,11 @@ expect(element).to_satisfy_none(
 | JS state | Yes | No | No | No |
 | Shadow DOM | Yes | No | Yes | No |
 | Select/dropdown | Yes | No | Yes | No |
-| Alerts | Yes | Yes | Yes | No |
-| Configurable polling | Yes (fixed + backoff) | Fixed | Fixed | No |
-| Descriptive errors | Yes (timeline + HTML) | Basic | Good | Basic |
-| Framework dependency | None | Selenium | Playwright | IDE |
-| Python support | >= 3.11 | All | N/A | N/A |
+| Alerts | Yes | Yes | No |
+| Configurable polling | Yes (fixed + backoff) | Fixed | No |
+| Descriptive errors | Yes (timeline + HTML) | Basic | Basic |
+| Framework dependency | None | Selenium | IDE |
+| Python support | >= 3.11 | All | N/A |
 
 ---
 
@@ -624,4 +624,4 @@ Please report security vulnerabilities privately — see [SECURITY.md](https://g
 
 ## Acknowledgements
 
-Inspired by [Playwright](https://playwright.dev/)'s assertion API and [`@playwright/test`'s `expect()`](https://playwright.dev/python/docs/test-assertions). Built on [Selenium](https://www.selenium.dev/) Python bindings.
+Built on [Selenium](https://www.selenium.dev/) Python bindings.

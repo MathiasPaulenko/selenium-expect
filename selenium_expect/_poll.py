@@ -1,6 +1,6 @@
 """PollAssertion — retry-based assertions over arbitrary functions.
 
-``poll(fn)`` wraps any zero-arg callable and provides Playwright-style
+``poll(fn)`` wraps any zero-arg callable and provides fluent
 assertion methods that retry until the function's return value satisfies
 the condition or the timeout expires.
 """

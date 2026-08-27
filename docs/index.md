@@ -1,6 +1,6 @@
 # selenium-expect
 
-Playwright-style `expect()` assertions with auto-retry for Selenium Python.
+Fluent `expect()` assertions with auto-retry for Selenium Python.
 
 ## Why selenium-expect?
 
@@ -166,18 +166,18 @@ patient_expect(driver).to_have_title("Loaded")
 
 ## Comparison with other tools
 
-| Feature | selenium-expect | WebDriverWait + EC | Playwright Python |
+| Feature | selenium-expect | WebDriverWait + EC |
 | --- | --- | --- | --- |
-| Auto-retry | Yes | Yes (manual) | Yes |
-| Fluent chaining | Yes | No | Yes |
+| Auto-retry | Yes | Yes (manual) |
+| Fluent chaining | Yes | No |
 | Negation | `.not_` | Manual | `.not_` |
 | Soft assertions | Yes | No | No |
 | Custom matchers | Yes | No | No |
-| Locator-based re-find | Yes | Via `EC` | Built-in |
-| Configurable backoff | Yes | No | No |
-| Descriptive errors | Timeline + HTML | Minimal | Good |
-| Framework dependency | None | None | Playwright |
-| Browser support | Any Selenium driver | Any Selenium driver | Chromium/Firefox/WebKit |
+| Locator-based re-find | Yes | Via `EC` |
+| Configurable backoff | Yes | No |
+| Descriptive errors | Timeline + HTML | Minimal |
+| Framework dependency | None | None |
+| Browser support | Any Selenium driver | Any Selenium driver |
 
 ## License
 

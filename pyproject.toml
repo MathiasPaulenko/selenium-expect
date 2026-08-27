@@ -5,13 +5,13 @@ build-backend = "hatchling.build"
 [project]
 name = "selenium-expect"
 version = "1.0.0"
-description = "Playwright-style expect() assertions with auto-retry for Selenium Python"
+description = "Fluent expect() assertions with auto-retry for Selenium Python"
 readme = "README.md"
 license = "MIT"
 license-files = ["LICENSE"]
 requires-python = ">=3.11"
 authors = [{ name = "Mathias Paulenko", email = "mathias.paulenko@outlook.com" }]
-keywords = ["selenium", "expect", "assertions", "testing", "retry", "playwright"]
+keywords = ["selenium", "expect", "assertions", "testing", "retry", "fluent"]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",

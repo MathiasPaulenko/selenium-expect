@@ -1,4 +1,4 @@
-"""selenium-expect — Playwright-style expect() for Selenium Python."""
+"""selenium-expect — Fluent expect() assertions for Selenium Python."""
 
 from __future__ import annotations
 
