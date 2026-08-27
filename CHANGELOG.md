@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [1.0.0] - 2026-08-27
 
 ### Added
 
@@ -18,6 +18,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Automated release workflow (`.github/workflows/release.yml`) with PyPI trusted publishing and GitHub Releases
 - `expect.configure()` example and Features section to README
 - Ruff badge to README header
+- Comprehensive MkDocs documentation with Material theme
+- Auto-retry polling with configurable timeout and backoff schedules
+- Fluent assertion API for `WebElement`, `WebDriver`, `list[WebElement]`, `Alert`, `Select`, `ShadowRoot`, iframes, cookies, JavaScript, and windows
+- Locator-based expect to avoid `StaleElementReferenceException`
+- Soft assertions with `SoftAssertionCollector` and `assert_all()`
+- Custom matchers via `@extend` decorator and `merge_expects()`
+- `expect.poll()` for retry-based assertions on arbitrary functions
+- `ExpectConfig` dataclass for global and per-assertion configuration
+- Screenshot capture on assertion failure
+- Debug mode with per-poll logging
+- Descriptive error messages with timelines and actual vs expected values
+- Composition assertions: `to_satisfy_all`, `to_satisfy_any`, `to_satisfy_none`
+- Negation via `.not_` on all assertions
 
 ### Fixed
 

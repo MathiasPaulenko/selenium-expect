@@ -1,0 +1,97 @@
+site_name: selenium-expect
+site_description: Playwright-style expect() for Selenium Python
+site_author: Mathias Paulenko
+site_url: https://mathiaspaulenko.github.io/selenium-expect/
+repo_url: https://github.com/MathiasPaulenko/selenium-expect
+repo_name: MathiasPaulenko/selenium-expect
+edit_uri: edit/main/docs/
+
+theme:
+  name: material
+  features:
+    - navigation.sections
+    - navigation.expand
+    - navigation.indexes
+    - navigation.top
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - content.code.annotate
+  palette:
+    - scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  icon:
+    repo: fontawesome/brands/github
+
+nav:
+  - Home: index.md
+  - Getting started: getting-started.md
+  - Assertions:
+      - Driver / Page: assertions/driver.md
+      - Element: assertions/element.md
+      - List: assertions/list.md
+      - Alert: assertions/alert.md
+      - Cookie: assertions/cookie.md
+      - Select / Dropdown: assertions/select.md
+      - Shadow DOM: assertions/shadow.md
+      - JavaScript / Browser state: assertions/js.md
+      - Iframe: assertions/iframe.md
+      - Window: assertions/window.md
+  - Guide:
+      - Configuration: guide/configuration.md
+      - Soft assertions: guide/soft-assertions.md
+      - Custom matchers: guide/custom-matchers.md
+      - Locator-based expect: guide/locator-based.md
+      - Composition: guide/composition.md
+      - expect.poll(): guide/poll.md
+      - Error messages: guide/error-messages.md
+      - Migration from WebDriverWait: guide/migration.md
+  - API reference: api-reference.md
+  - Changelog: changelog.md
+
+plugins:
+  - search
+  - include-markdown
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            show_source: true
+            show_root_heading: true
+            show_signature_annotations: true
+            separate_signature: true
+            show_symbol_type_heading: true
+            show_symbol_type_toc: true
+            docstring_style: google
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - tables
+  - toc:
+      permalink: true
+  - attr_list
+  - md_in_html
+  - def_list
+  - footnotes
