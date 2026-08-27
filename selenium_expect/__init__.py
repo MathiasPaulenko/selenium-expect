@@ -16,7 +16,7 @@ from selenium_expect._matcher import extend, merge_expects
 from selenium_expect._poll import poll
 from selenium_expect._soft import SoftAssertionCollector, assert_all
 
-__version__ = "0.1.0"
+__version__ = "1.0.0"
 
 __all__: list[str] = [
     "ExpectConfig",
