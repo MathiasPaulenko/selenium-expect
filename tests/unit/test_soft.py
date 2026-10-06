@@ -92,3 +92,42 @@ class TestSoftAssertionsIntegration:
         with pytest.raises(AssertionError, match="to have text"):
             expect(mock_element).to_have_text("wrong text")
         assert SoftAssertionCollector.get_failures() == []
+
+
+class TestSoftAssertionIsolation:
+    def test_failures_isolated_between_threads(self) -> None:
+        """Failures collected in one thread don't leak into another."""
+        import threading
+
+        SoftAssertionCollector.reset()
+        SoftAssertionCollector.add_failure("main failure")
+
+        other: list[str] = []
+
+        def worker() -> None:
+            # Fresh context in the new thread — starts empty
+            SoftAssertionCollector.add_failure("thread failure")
+            other.extend(SoftAssertionCollector.get_failures())
+
+        t = threading.Thread(target=worker)
+        t.start()
+        t.join()
+
+        assert other == ["thread failure"]
+        assert SoftAssertionCollector.get_failures() == ["main failure"]
+
+    def test_reset_only_affects_own_context(self) -> None:
+        """reset() in one thread doesn't clear another thread's failures."""
+        import threading
+
+        SoftAssertionCollector.reset()
+        SoftAssertionCollector.add_failure("main failure")
+
+        def worker() -> None:
+            SoftAssertionCollector.reset()
+
+        t = threading.Thread(target=worker)
+        t.start()
+        t.join()
+
+        assert SoftAssertionCollector.get_failures() == ["main failure"]

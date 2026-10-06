@@ -13,8 +13,7 @@ pytestmark = pytest.mark.integration
 
 @pytest.fixture()
 def cookie_driver(test_page: Any) -> Any:
-    """Navigate to a real HTTP origin so cookies can be set."""
-    test_page.get("https://example.com")
+    """Add a cookie on the local HTTP origin."""
     test_page.add_cookie({"name": "test-cookie", "value": "test-cookie-value"})
     return test_page
 

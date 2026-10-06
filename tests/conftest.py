@@ -66,24 +66,6 @@ def mock_alert() -> Any:
     return alert
 
 
-@pytest.fixture()
-def mock_driver_with_alert(mock_driver: Any) -> Any:
-    """Mock WebDriver with alert support."""
-    alert = MagicMock()
-    alert.text = "Are you sure?"
-    mock_driver.switch_to.alert = alert
-    return mock_driver
-
-
-@pytest.fixture()
-def mock_driver_no_alert(mock_driver: Any) -> Any:
-    """Mock WebDriver where switch_to.alert raises NoAlertPresentException."""
-    from selenium.common.exceptions import NoAlertPresentException
-
-    mock_driver.switch_to.alert.side_effect = NoAlertPresentException("No alert")
-    return mock_driver
-
-
 # --- Mock WebElement ---
 
 
@@ -345,7 +327,8 @@ def mock_driver_js(mock_driver: Any) -> Any:
         if script == "return sessionStorage.getItem(arguments[0]);":
             return ss_values.get(args[0]) if args else None
         if script == "return window[arguments[0]];":
-            return static_js.get("return window.innerWidth;")
+            js_vars: dict[str, Any] = {"innerWidth": 1280}
+            return js_vars.get(args[0]) if args else None
         return static_js.get(script)
 
     mock_driver.execute_script.side_effect = _execute

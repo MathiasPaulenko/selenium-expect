@@ -317,3 +317,15 @@ class TestExpectElementShadow:
         el.tag_name = "div"
         el.get_attribute.return_value = None
         expect(el).to_have_shadow_root()
+
+
+class TestExpectElementChaining:
+    def test_assertions_return_self(self, mock_element: Any) -> None:
+        """to_* methods return self — fluent chaining works."""
+        result = expect(mock_element).to_be_visible()
+        assert result is not None
+        result.to_have_text("Hello World").to_be_enabled().to_have_tag("div")
+
+    def test_chaining_with_negation(self, mock_element: Any) -> None:
+        """not_ applies to every assertion in the chain."""
+        expect(mock_element).not_.to_be_hidden().to_be_disabled()

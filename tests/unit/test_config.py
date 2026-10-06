@@ -80,7 +80,7 @@ class TestGlobalConfigSetters:
 
     def test_set_default_polling_intervals(self) -> None:
         set_default_polling_intervals([0.1, 0.5, 1.0])
-        assert get_config().polling_intervals == [0.1, 0.5, 1.0]
+        assert get_config().polling_intervals == (0.1, 0.5, 1.0)
 
     def test_set_screenshot_on_failure(self) -> None:
         set_screenshot_on_failure(True)

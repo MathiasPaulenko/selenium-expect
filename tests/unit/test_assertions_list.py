@@ -389,3 +389,55 @@ class TestExpectListDispatch:
         """expect(elements) returns ExpectList instance."""
         result = expect(mock_elements)
         assert isinstance(result, ExpectList)
+
+
+class TestExpectListTextsMatch:
+    def test_to_have_texts_match(self, mock_elements: list[Any]) -> None:
+        """expect(elements).to_have_texts_match(patterns) passes."""
+        expect(mock_elements).to_have_texts_match([r"App\w+", r"Ban\w+", r"Cher\w+"])
+
+    def test_to_have_texts_match_fails(self, mock_elements: list[Any]) -> None:
+        """expect(elements).to_have_texts_match(['^X', ...]) raises."""
+        with pytest.raises(AssertionError, match="to have texts matching"):
+            expect(mock_elements).to_have_texts_match([r"^X", r"Ban\w+", r"Cher\w+"])
+
+    def test_to_have_texts_match_length_mismatch_fails(self, mock_elements: list[Any]) -> None:
+        """Pattern count mismatch fails rather than silently passing."""
+        with pytest.raises(AssertionError, match="to have texts matching"):
+            expect(mock_elements).to_have_texts_match([r"App\w+", r"Ban\w+"])
+
+    def test_to_have_texts_match_empty_raises(self, mock_elements: list[Any]) -> None:
+        """to_have_texts_match([]) raises ValueError."""
+        with pytest.raises(ValueError, match="patterns list must not be empty"):
+            expect(mock_elements).to_have_texts_match([])
+
+    def test_not_to_have_texts_match(self, mock_elements: list[Any]) -> None:
+        """expect(elements).not_.to_have_texts_match(non-matching) passes."""
+        expect(mock_elements).not_.to_have_texts_match([r"^X", r"^Y", r"^Z"])
+
+
+class TestExpectListValuesContains:
+    def test_to_have_values_contains(self, mock_elements: list[Any]) -> None:
+        """expect(elements).to_have_values_contains(substrings) passes."""
+        expect(mock_elements).to_have_values_contains(["app", "ban", "cher"])
+
+    def test_to_have_values_contains_fails(self, mock_elements: list[Any]) -> None:
+        """expect(elements).to_have_values_contains(['xyz', ...]) raises."""
+        with pytest.raises(AssertionError, match="to have values containing"):
+            expect(mock_elements).to_have_values_contains(["xyz", "ban", "cher"])
+
+    def test_to_have_values_contains_empty_raises(self, mock_elements: list[Any]) -> None:
+        """to_have_values_contains([]) raises ValueError."""
+        with pytest.raises(ValueError, match="values list must not be empty"):
+            expect(mock_elements).to_have_values_contains([])
+
+    def test_not_to_have_values_contains(self, mock_elements: list[Any]) -> None:
+        """expect(elements).not_.to_have_values_contains(non-matching) passes."""
+        expect(mock_elements).not_.to_have_values_contains(["xyz", "zzz", "qqq"])
+
+
+class TestExpectListTupleDispatch:
+    def test_expect_dispatches_tuple_to_list(self, mock_elements: list[Any]) -> None:
+        """expect(tuple) returns ExpectList instance."""
+        result = expect(tuple(mock_elements))
+        assert isinstance(result, ExpectList)

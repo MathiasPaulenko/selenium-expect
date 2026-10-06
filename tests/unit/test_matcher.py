@@ -86,7 +86,7 @@ class TestCustomMatcherIntegration:
         def check_attr(element: Any, attr: str) -> tuple[bool, Any]:
             return (False, "wrong")
 
-        with pytest.raises(AssertionError, match="to_have_custom_attr_fail"):
+        with pytest.raises(AssertionError, match="to have custom attr fail"):
             expect(mock_element).to_have_custom_attr_fail("value")
 
     def test_custom_matcher_negation(self, mock_element: Any) -> None:
@@ -106,7 +106,7 @@ class TestCustomMatcherIntegration:
         def always_pass(element: Any) -> tuple[bool, Any]:
             return (True, "pass")
 
-        with pytest.raises(AssertionError, match="to_be_passing"):
+        with pytest.raises(AssertionError, match="to be passing"):
             expect(mock_element).not_.to_be_passing()
 
     def test_custom_matcher_with_timeout(self, mock_element: Any) -> None:

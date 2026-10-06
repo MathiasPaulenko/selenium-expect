@@ -39,15 +39,16 @@ class TestExpectIframe:
             ExpectIframe(mock_driver_iframe).to_have_frame_text("frame1", "Missing text")
 
     def test_to_have_frame_text_switches_back_on_success(self, mock_driver_iframe: Any) -> None:
-        """to_have_frame_text calls default_content after reading page_source."""
+        """to_have_frame_text calls parent_frame after reading page_source."""
         ExpectIframe(mock_driver_iframe).to_have_frame_text("frame1", "Frame content")
-        mock_driver_iframe.switch_to.default_content.assert_called()
+        mock_driver_iframe.switch_to.parent_frame.assert_called()
 
     def test_to_have_frame_text_switches_back_on_exception(self, mock_driver_iframe: Any) -> None:
-        """to_have_frame_text calls default_content even if page_source raises.
+        """to_have_frame_text calls parent_frame even if page_source raises.
 
         Regression: previously, if page_source raised a non-NoSuchFrameException,
-        default_content was never called, leaving the driver stuck in the frame.
+        the previous frame context was never restored, leaving the driver
+        stuck in the frame.
         """
         from unittest.mock import PropertyMock
 
@@ -58,4 +59,4 @@ class TestExpectIframe:
         )
         with pytest.raises(WebDriverException):
             ExpectIframe(mock_driver_iframe).to_have_frame_text("frame1", "Frame content")
-        mock_driver_iframe.switch_to.default_content.assert_called()
+        mock_driver_iframe.switch_to.parent_frame.assert_called()

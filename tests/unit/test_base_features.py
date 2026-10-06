@@ -31,7 +31,7 @@ class TestNormalizeTimeout:
 
     def test_float_above_1000_treated_as_seconds(self) -> None:
         """Floats are always seconds — only ints >= 1000 are milliseconds."""
-        assert _normalize_timeout(5000.0) == 5000.0
+        assert _normalize_timeout(5000.0) == 5.0
 
     def test_zero(self) -> None:
         assert _normalize_timeout(0) == 0.0

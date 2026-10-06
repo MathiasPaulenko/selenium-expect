@@ -6,7 +6,6 @@ from typing import Any
 from unittest.mock import MagicMock
 
 import pytest
-from selenium.common.exceptions import NoSuchFrameException
 
 from selenium_expect import expect
 from selenium_expect.assertions.iframe import ExpectIframe
@@ -548,32 +547,34 @@ class TestJSVariable:
 
 class TestIframeFrameContext:
     def test_to_be_in_frame(self, mock_driver_iframe: Any) -> None:
+        mock_driver_iframe.execute_script.return_value = True
         iframe = ExpectIframe(mock_driver_iframe)
-        iframe.to_be_in_frame("frame1")
+        iframe.to_be_in_frame()
 
     def test_to_be_in_frame_fails(self, mock_driver_iframe: Any) -> None:
-        mock_driver_iframe.switch_to.frame.side_effect = NoSuchFrameException("No frame")
+        mock_driver_iframe.execute_script.return_value = False
         iframe = ExpectIframe(mock_driver_iframe)
         with pytest.raises(AssertionError):
-            iframe.to_be_in_frame("nonexistent")
+            iframe.to_be_in_frame()
 
     def test_not_to_be_in_frame(self, mock_driver_iframe: Any) -> None:
-        mock_driver_iframe.switch_to.frame.side_effect = NoSuchFrameException("No frame")
+        mock_driver_iframe.execute_script.return_value = False
         iframe = ExpectIframe(mock_driver_iframe)
-        iframe.not_.to_be_in_frame("nonexistent")
+        iframe.not_.to_be_in_frame()
 
     def test_to_be_in_default_content(self, mock_driver_iframe: Any) -> None:
+        mock_driver_iframe.execute_script.return_value = False
         iframe = ExpectIframe(mock_driver_iframe)
         iframe.to_be_in_default_content()
 
     def test_to_be_in_default_content_fails(self, mock_driver_iframe: Any) -> None:
-        mock_driver_iframe.switch_to.default_content.side_effect = Exception("Error")
+        mock_driver_iframe.execute_script.return_value = True
         iframe = ExpectIframe(mock_driver_iframe)
         with pytest.raises(AssertionError):
             iframe.to_be_in_default_content()
 
     def test_not_to_be_in_default_content(self, mock_driver_iframe: Any) -> None:
-        mock_driver_iframe.switch_to.default_content.side_effect = Exception("Error")
+        mock_driver_iframe.execute_script.return_value = True
         iframe = ExpectIframe(mock_driver_iframe)
         iframe.not_.to_be_in_default_content()
 

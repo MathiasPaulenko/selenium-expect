@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import functools
+import http.server
 import threading
 from pathlib import Path
 from typing import Any
@@ -121,13 +123,33 @@ def driver() -> Any:
     quit_thread.join(timeout=5)
 
 
+class _QuietHandler(http.server.SimpleHTTPRequestHandler):
+    def log_message(self, *args: Any) -> None:
+        pass
+
+
 @pytest.fixture()
-def test_page(driver: Any) -> Any:
-    """Load the local test HTML page and return the driver."""
-    html_path = Path(__file__).parent / "test_page.html"
+def test_page(driver: Any, tmp_path: Path) -> Any:
+    """Serve the test HTML page over localhost and return the driver.
+
+    Serving over HTTP (instead of file://) lets cookies and other
+    origin-dependent APIs behave like a real page, without any
+    external network dependency.
+    """
+    html_path = tmp_path / "test_page.html"
     html_path.write_text(TEST_PAGE_HTML, encoding="utf-8")
-    driver.get(f"file:///{html_path.as_posix()}")
-    yield driver
+
+    handler = functools.partial(_QuietHandler, directory=str(tmp_path))
+    httpd = http.server.ThreadingHTTPServer(("127.0.0.1", 0), handler)
+    port = httpd.server_address[1]
+    thread = threading.Thread(target=httpd.serve_forever, daemon=True)
+    thread.start()
+    try:
+        driver.get(f"http://127.0.0.1:{port}/test_page.html")
+        yield driver
+    finally:
+        httpd.shutdown()
+        httpd.server_close()
 
 
 @pytest.fixture(autouse=True)

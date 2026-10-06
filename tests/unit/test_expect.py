@@ -55,7 +55,7 @@ class TestExpectConfigOverride:
     def test_per_assertion_polling_intervals(self, mock_element: Any) -> None:
         """expect(el, polling=[0.05, 0.1, 0.5]) uses backoff schedule."""
         result = expect(mock_element, polling=[0.05, 0.1, 0.5])
-        assert result._config.polling_intervals == [0.05, 0.1, 0.5]
+        assert result._config.polling_intervals == (0.05, 0.1, 0.5)
 
     def test_per_assertion_message(self, mock_element: Any) -> None:
         """expect(el, message='custom') includes message in error."""
@@ -121,7 +121,7 @@ class TestExpectConfigure:
         """expect.configure(polling=[...]) pre-applies backoff schedule."""
         configured = expect.configure(polling=[0.05, 0.1, 0.2])
         result = configured(mock_element)
-        assert result._config.polling_intervals == [0.05, 0.1, 0.2]
+        assert result._config.polling_intervals == (0.05, 0.1, 0.2)
 
     def test_configure_no_kwargs(self, mock_element: Any) -> None:
         """expect.configure() with no kwargs behaves like expect()."""

@@ -20,3 +20,10 @@ class TestIntegrationIframe:
 
     def test_frame_text(self, test_page: Any) -> None:
         expect(test_page).to_have_frame_text("test-iframe", "Iframe content")
+
+    def test_in_frame_and_default_content(self, test_page: Any) -> None:
+        expect(test_page).to_be_in_default_content()
+        test_page.switch_to.frame("test-iframe")
+        expect(test_page).to_be_in_frame()
+        test_page.switch_to.default_content()
+        expect(test_page).to_be_in_default_content()

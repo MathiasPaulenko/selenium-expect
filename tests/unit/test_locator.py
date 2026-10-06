@@ -221,3 +221,61 @@ class TestLocatorExpectScreenshot:
         # The outer LocatorExpect should take at most 1 screenshot on failure,
         # not one per poll of the inner assertion.
         assert mock_driver.save_screenshot.call_count <= 1
+
+
+class TestLocatorExpectComposition:
+    """to_satisfy_* on LocatorExpect must pass the re-found element,
+    not the WebDriver, to each condition."""
+
+    def test_to_satisfy_all_passes_refound_element(
+        self, mock_driver: Any, mock_element_for_locator: Any
+    ) -> None:
+        """Conditions receive the element, not the driver."""
+        mock_driver.find_element.return_value = mock_element_for_locator
+        received: list[Any] = []
+        expect(mock_driver, by=By.ID, value="foo").to_satisfy_all(
+            lambda el: received.append(el),
+        )
+        assert received == [mock_element_for_locator]
+
+    def test_to_satisfy_all_fails_when_element_missing(self, mock_driver: Any) -> None:
+        """Composition fails when the element can't be found."""
+        from selenium.common.exceptions import NoSuchElementException
+
+        mock_driver.find_element.side_effect = NoSuchElementException()
+        with pytest.raises(AssertionError):
+            expect(mock_driver, by=By.ID, value="foo", timeout=0.3, polling=0.05).to_satisfy_all(
+                lambda el: None,
+            )
+
+    def test_to_satisfy_all_fails_on_inner_condition(
+        self, mock_driver: Any, mock_element_for_locator: Any
+    ) -> None:
+        """A failing inner condition propagates as AssertionError."""
+        mock_driver.find_element.return_value = mock_element_for_locator
+        with pytest.raises(AssertionError):
+            expect(mock_driver, by=By.ID, value="foo", timeout=0.3, polling=0.05).to_satisfy_all(
+                lambda el: expect(el, timeout=0.1).to_have_text("Wrong"),
+            )
+
+    def test_to_satisfy_any_passes(self, mock_driver: Any, mock_element_for_locator: Any) -> None:
+        """to_satisfy_any passes when at least one condition passes."""
+        mock_driver.find_element.return_value = mock_element_for_locator
+        expect(mock_driver, by=By.ID, value="foo").to_satisfy_any(
+            lambda el: expect(el, timeout=0.1).to_have_text("Wrong"),
+            lambda el: expect(el).to_have_text("Hello World"),
+        )
+
+    def test_to_satisfy_none_passes(self, mock_driver: Any, mock_element_for_locator: Any) -> None:
+        """to_satisfy_none passes when no condition passes."""
+        mock_driver.find_element.return_value = mock_element_for_locator
+        expect(mock_driver, by=By.ID, value="foo").to_satisfy_none(
+            lambda el: expect(el, timeout=0.1).to_have_text("Wrong"),
+        )
+
+    def test_not_to_satisfy_all(self, mock_driver: Any, mock_element_for_locator: Any) -> None:
+        """not_.to_satisfy_all passes when a condition fails."""
+        mock_driver.find_element.return_value = mock_element_for_locator
+        expect(mock_driver, by=By.ID, value="foo", timeout=0.3, polling=0.05).not_.to_satisfy_all(
+            lambda el: expect(el, timeout=0.1).to_have_text("Wrong"),
+        )
