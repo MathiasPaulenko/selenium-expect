@@ -5,6 +5,39 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+## [1.1.0] - 2026-10-07
+
+### Added
+
+- `to_have_texts_match(patterns)` and `to_have_values_contains(values)` list assertions
+- Assertion methods now return `self`, enabling fluent chaining (`expect(el).to_be_visible().to_be_enabled()`)
+- `expect.configure()` variants expose `.poll`
+- `extend()` validates matcher names (must be a public identifier)
+
+### Changed
+
+- `to_be_in_frame()` takes no arguments and asserts the driver is currently inside a frame (no context switch side effects)
+- `to_be_in_default_content()` performs a real check instead of always passing
+- `ExpectConfig.polling_intervals` is normalized to an immutable tuple
+- `normalize_timeout()` treats any value >= 1000 as milliseconds (floats included); scalar `polling` is normalized the same way
+- `expect()` accepts tuples as list targets
+- Screenshot capture works for `Alert` and element-list targets
+- Locator assertion failures preserve the inner assertion's error message
+- `pytest` runs unit tests by default; use `pytest -m integration` for browser tests
+- Integration tests run against a local HTTP server (no external network dependency)
+- `SoftAssertionCollector` stores failures per thread/async context (`ContextVar`), so parallel tests are isolated
+- Release workflow verifies the tag matches `pyproject.toml` version (and `__version__`) before building
+
+### Fixed
+
+- `LocatorExpect.to_satisfy_all/any/none` passed the WebDriver instead of the re-found element to conditions
+- `to_have_frame_available` and `to_have_frame_text` now restore the previous frame context (`parent_frame`) instead of always jumping to top-level content
+- `to_be_visible`, `to_be_enabled`, `to_be_checked`, and `to_be_selected` no longer query the element twice per poll
+- `test_smoke.py::test_version` expected version `0.1.0`
+- Documentation: fluent chaining, soft assertions, `expect.configure()`, custom matcher, iframe, select, JS, and API-reference examples now match the real API; broken comparison tables fixed
+
 ## [1.0.0] - 2026-08-27
 
 ### Added

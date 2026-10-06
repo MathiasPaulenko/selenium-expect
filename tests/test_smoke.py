@@ -4,7 +4,7 @@ import selenium_expect
 
 
 def test_version() -> None:
-    assert selenium_expect.__version__ == "1.0.0"
+    assert selenium_expect.__version__ == "1.1.0"
 
 
 def test_all_exports() -> None:
