@@ -243,20 +243,21 @@ expect(driver).to_have_session_storage_length(2)
 
 ```python
 # Verify a JS expression returns a specific value
-expect(driver).to_have_js_result("document.title", "Dashboard")
+expect(driver).to_have_js_result("return document.title;", "Dashboard")
 
 # Verify a JS expression returns a value containing a substring
-expect(driver).to_have_js_result_contains("document.title", "Dash")
+expect(driver).to_have_js_result_contains("return document.title;", "Dash")
 
-# Verify an async JS expression
+# Verify an async JS expression (resolve via the injected callback)
 expect(driver).to_have_async_js_result(
-    "return await fetch('/api/status').then(r => r.json()).then(d => d.status)",
+    "fetch('/api/status').then(r => r.json())"
+    ".then(d => arguments[arguments.length - 1](d.status));",
     "ok",
     timeout=10,
 )
 
 # Verify a JS variable value
-expect(driver).to_have_js_variable("window.appVersion", "2.0.0")
+expect(driver).to_have_js_variable("appVersion", "2.0.0")
 ```
 
 ### Working with localStorage
@@ -295,7 +296,7 @@ expect(driver).to_have_session_storage_length(2)
 
 ```python
 # JS result is NOT "loading"
-expect(driver).not_.to_have_js_result("document.readyState", "loading")
+expect(driver).not_.to_have_js_result("return document.readyState;", "loading")
 
 # localStorage item is NOT present
 expect(driver).not_.to_have_local_storage_item_present("oldToken")
@@ -310,6 +311,9 @@ expect(driver).not_.to_have_session_storage_length(10)
 # After a SPA navigates, verify the app state in localStorage
 expect(driver).to_have_local_storage_item("currentRoute", "/dashboard")
 expect(driver).to_have_local_storage_item_present("authToken")
-expect(driver).to_have_js_variable("window.app.state", "loaded")
-expect(driver).to_have_js_result("document.querySelector('#app').getAttribute('data-loaded')", "true")
+expect(driver).to_have_js_result("return window.app.state;", "loaded")
+expect(driver).to_have_js_result(
+    "return document.querySelector('#app').getAttribute('data-loaded');",
+    "true",
+)
 ```

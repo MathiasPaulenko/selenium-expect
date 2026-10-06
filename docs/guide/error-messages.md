@@ -70,6 +70,13 @@ set_screenshot_on_failure(True, path="./screenshots/")
 
 Screenshots are saved as `screenshot_{timestamp}_{condition}.png`.
 
+!!! warning "Sensitive data in error output"
+
+    Failure messages include the element's `outerHTML` and actual values
+    (texts, attribute values, cookie values, JS results). These may contain
+    tokens or personal data — keep test logs private, and avoid asserting
+    on secrets with descriptive messages if logs are shared.
+
 ## Examples
 
 ### Understanding the timeline
@@ -113,12 +120,12 @@ expect(
 
 ### Debug mode output
 
-When debug mode is enabled, each poll prints details:
+When debug mode is enabled, each poll logs details on the `selenium_expect` logger (DEBUG level):
 
 ```text
-[selenium_expect] poll 1/10: to be visible → False (elapsed: 0ms)
-[selenium_expect] poll 2/10: to be visible → False (elapsed: 501ms)
-[selenium_expect] poll 3/10: to be visible → True (elapsed: 1002ms)
+poll 1: passed=False actual=False — 0.4ms elapsed
+poll 2: passed=False actual=False — 500.9ms elapsed
+poll 3: passed=True actual=True — 1001.8ms elapsed
 ```
 
 ### Screenshots on failure

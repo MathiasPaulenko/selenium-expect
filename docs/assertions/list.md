@@ -137,7 +137,7 @@ expect(items).to_have_texts_contains(["App", "Ban", "Cher"])
 
 ---
 
-### `to_have_texts_contain(text)`
+### `to_have_any_text_contain(text)`
 
 Asserts that at least one element's text contains `text`.
 
@@ -150,7 +150,7 @@ Asserts that at least one element's text contains `text`.
 **Example**:
 
 ```python
-expect(items).to_have_texts_contain("Banana")
+expect(items).to_have_any_text_contain("Banana")
 ```
 
 ---

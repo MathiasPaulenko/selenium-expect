@@ -16,7 +16,7 @@ set_default_timeout(5000)  # interpreted as 5000 ms = 5 seconds
 ```
 
 !!! note
-    If `seconds` is an `int >= 1000`, it is interpreted as **milliseconds**. Floats and ints `< 1000` are treated as seconds.
+    Any value `>= 1000` is interpreted as **milliseconds**; smaller values are treated as seconds. The same normalization applies to `timeout` and scalar `polling` overrides.
 
 ### `set_default_polling_interval(seconds)`
 
@@ -93,7 +93,7 @@ The immutable `ExpectConfig` dataclass holds all settings:
 |---|---|---|---|
 | `timeout` | `float` | `5.0` | Default timeout in seconds |
 | `polling_interval` | `float` | `0.5` | Fixed polling interval |
-| `polling_intervals` | `list[float] \| None` | `None` | Backoff schedule |
+| `polling_intervals` | `Sequence[float] \| None` | `None` | Backoff schedule (stored as an immutable tuple) |
 | `screenshot_on_failure` | `bool` | `False` | Capture screenshot on failure |
 | `screenshot_path` | `str \| None` | `None` | Screenshot directory |
 | `debug_mode` | `bool` | `False` | Debug logging |
@@ -148,12 +148,16 @@ fast = expect.configure(timeout=2.0, polling=0.1)
 # Patient checks for slow operations (e.g., page navigation, API calls)
 patient = expect.configure(timeout=30.0, polling=0.5)
 
-# Debug variant with screenshots
+# Debug variant with screenshots (config fields go through ExpectConfig)
+from selenium_expect import ExpectConfig
+
 debug = expect.configure(
-    timeout=10.0,
-    polling=0.25,
-    screenshot_on_failure=True,
-    screenshot_path="./debug_screens/",
+    config=ExpectConfig(
+        timeout=10.0,
+        polling_interval=0.25,
+        screenshot_on_failure=True,
+        screenshot_path="./debug_screens/",
+    )
 )
 
 # Use them in tests

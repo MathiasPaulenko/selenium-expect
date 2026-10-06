@@ -170,8 +170,9 @@ WebDriverWait(driver, 10).until(EC.alert_is_present())
 **After**:
 
 ```python
-alert = driver.switch_to.alert
-expect(alert).to_be_present(timeout=10)
+from selenium.webdriver.common.alert import Alert
+
+expect(Alert(driver)).to_be_present(timeout=10)
 ```
 
 ### Complex custom condition
@@ -190,13 +191,13 @@ WebDriverWait(driver, 10).until(element_has_class, (By.ID, "btn"), "active")
 
 ```python
 # Direct assertion
-expect(driver.find_element(By.ID, "btn")).to_have_class_contain("active", timeout=10)
+expect(driver.find_element(By.ID, "btn")).to_have_class("active", timeout=10)
 
 # Or with a custom matcher
-@extend("to_have_class")
+@extend("to_have_class_word")
 def check_class(element, class_name):
     classes = element.get_attribute("class") or ""
     return (class_name in classes.split(), classes)
 
-expect(driver.find_element(By.ID, "btn")).to_have_class("active", timeout=10)
+expect(driver.find_element(By.ID, "btn")).to_have_class_word("active", timeout=10)
 ```

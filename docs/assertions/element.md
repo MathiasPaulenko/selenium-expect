@@ -1163,13 +1163,13 @@ Asserts that `name` is a substring of `element.accessible_name`.
 expect(element).to_have_accessible_name_contains("Submit")
 ```
 
-## Shadow DOM (element-level)
+## JavaScript properties
 
 ### `to_have_js_property(name, value)`
 
 Asserts that a JavaScript property on the element equals `value`.
 
-**Selenium API**: `element.get_property(name)` via JS
+**Selenium API**: `driver.execute_script("return arguments[0][arguments[1]];", element, name)`
 
 **Parameters**:
 
@@ -1182,7 +1182,7 @@ Asserts that a JavaScript property on the element equals `value`.
 expect(element).to_have_js_property("indeterminate", False)
 ```
 
----
+## Shadow DOM (element-level)
 
 ### `to_have_shadow_root()`
 

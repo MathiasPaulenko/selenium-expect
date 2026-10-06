@@ -47,7 +47,7 @@ Custom matchers work with:
 
 ## `merge_expects()`
 
-Combine custom matchers from multiple modules into the registry:
+Combine custom matchers from multiple modules into the registry. Since `@extend` registers matchers at decoration time, `merge_expects()` is mostly useful for bulk-importing modules (it returns the list of matcher names that were newly added):
 
 ```python
 from selenium_expect import merge_expects
@@ -75,6 +75,13 @@ def my_matcher(target: Any, *args, **kwargs) -> tuple[bool, Any]:
 - `target`: The object passed to `expect()` (e.g. `WebElement`, `WebDriver`).
 - `*args, **kwargs`: Any additional arguments from the call site (excluding `timeout` and `polling`, which are consumed by the retry loop).
 - Return: `(bool, Any)` where `bool` is `True` if the condition passed.
+
+!!! note "Name collisions"
+
+    Matcher names must be valid public identifiers. If a matcher name
+    collides with a built-in assertion method (e.g. `to_be_visible`), the
+    built-in method takes precedence on assertion classes that define it —
+    the matcher only fires on targets that don't have that method.
 
 ## Example: custom text matcher
 

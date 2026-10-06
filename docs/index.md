@@ -42,7 +42,7 @@ expect(driver.find_element(By.ID, "submit")).to_be_clickable()
 - **Auto-retry**: No more `WebDriverWait` + `expected_conditions` boilerplate. Every assertion polls until it passes or times out.
 - **Fluent API**: Chain assertions naturally — `expect(element).to_be_visible().to_have_text("Hello")`
 - **Negation**: Use `.not_` to invert any assertion — `expect(element).not_.to_be_disabled()`
-- **161 assertions** across 10 categories: driver, element, list, alert, cookie, JS, shadow DOM, select, iframe, window
+- **190+ assertions** across 10 categories: driver, element, list, alert, cookie, JS, shadow DOM, select, iframe, window
 - **Soft assertions**: Accumulate failures across multiple checks, then raise once at the end with `assert_all()`
 - **Custom matchers**: Extend `expect()` with your own assertion methods via the `@extend` decorator
 - **Locator-based expect**: Re-find elements on each poll cycle — eliminates `StaleElementReferenceException`
@@ -112,8 +112,8 @@ Collect all failures and raise once:
 from selenium_expect import expect, assert_all
 
 # Each assertion records failures without raising
-expect(driver).to_have_title("Wrong Title", soft=True)
-expect(driver.find_element(By.ID, "status")).to_have_text("Ready", soft=True)
+expect(driver, soft=True).to_have_title("Wrong Title")
+expect(driver.find_element(By.ID, "status"), soft=True).to_have_text("Ready")
 
 # Raise if any soft assertions failed
 assert_all()
@@ -127,11 +127,10 @@ Add your own assertion methods:
 from selenium_expect import expect, extend
 
 @extend("to_have_color")
-def to_have_color(self, color: str):
+def to_have_color(element, color: str):
     """Assert element has a specific CSS color."""
-    actual = self._target.value_of_css_property("color")
-    if actual != color:
-        raise AssertionError(f"Expected color {color!r}, got {actual!r}")
+    actual = element.value_of_css_property("color")
+    return (actual == color, actual)
 
 # Now use it like any built-in assertion
 expect(element).to_have_color("rgba(255, 0, 0, 1)")
@@ -167,12 +166,12 @@ patient_expect(driver).to_have_title("Loaded")
 ## Comparison with other tools
 
 | Feature | selenium-expect | WebDriverWait + EC |
-| --- | --- | --- | --- |
+| --- | --- | --- |
 | Auto-retry | Yes | Yes (manual) |
 | Fluent chaining | Yes | No |
-| Negation | `.not_` | Manual | `.not_` |
-| Soft assertions | Yes | No | No |
-| Custom matchers | Yes | No | No |
+| Negation | `.not_` | Manual |
+| Soft assertions | Yes | No |
+| Custom matchers | Yes | No |
 | Locator-based re-find | Yes | Via `EC` |
 | Configurable backoff | Yes | No |
 | Descriptive errors | Timeline + HTML | Minimal |

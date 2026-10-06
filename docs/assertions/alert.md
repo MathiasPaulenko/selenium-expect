@@ -15,7 +15,10 @@ Asserts that the alert is present (accessing `alert.text` does not raise).
 ```python
 from selenium.webdriver.common.alert import Alert
 
-alert = driver.switch_to.alert
+# Alert(driver) is lazy — to_be_present() polls until the alert appears.
+# (driver.switch_to.alert raises NoAlertPresentException immediately,
+# so it can't be used to wait for an alert.)
+alert = Alert(driver)
 expect(alert).to_be_present()
 ```
 
@@ -89,8 +92,10 @@ from selenium.webdriver.common.by import By
 # Trigger a confirmation dialog
 driver.find_element(By.ID, "delete-button").click()
 
-# Wait for the alert to appear
-alert = driver.switch_to.alert
+# Wait for the alert to appear (Alert(driver) is lazy)
+from selenium.webdriver.common.alert import Alert
+
+alert = Alert(driver)
 expect(alert).to_be_present(timeout=5)
 
 # Verify the alert text
@@ -109,7 +114,7 @@ expect(alert).not_.to_be_present(timeout=3)
 # Trigger a prompt dialog
 driver.find_element(By.ID, "rename-button").click()
 
-alert = driver.switch_to.alert
+alert = Alert(driver)
 expect(alert).to_be_present()
 
 # Verify the prompt message
@@ -123,7 +128,7 @@ alert.accept()
 ### Verifying alert text with patterns
 
 ```python
-alert = driver.switch_to.alert
+alert = Alert(driver)
 expect(alert).to_be_present()
 
 # Exact match
@@ -140,7 +145,7 @@ expect(alert).to_have_text_matches(r"Delete file '(.+)'")
 
 ```python
 # After accepting/dismissing, verify no alert is present
-alert = driver.switch_to.alert
+alert = Alert(driver)
 alert.accept()
 
 # The alert should no longer be present

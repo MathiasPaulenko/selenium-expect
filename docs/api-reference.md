@@ -39,7 +39,7 @@ Create an assertion for the given target. Dispatches to the appropriate assertio
 | `value` | `str` | `None` | Locator value (for locator-based expect) |
 | `locator` | `tuple[str, str]` | `None` | `(by, value)` tuple shorthand |
 | `message` | `str` | `None` | Custom message for error output |
-| `soft` | `bool` | `False` | Enable soft assertion mode |
+| `soft` | `bool \| None` | `None` | Enable soft assertion mode (`None` inherits global config) |
 | `timeout` | `float` | `None` | Override default timeout |
 | `polling` | `float \| list[float]` | `None` | Override default polling |
 
@@ -69,8 +69,10 @@ from selenium_expect import ExpectConfig, expect
 # Create a custom config
 config = ExpectConfig(timeout=10, polling_interval=0.25, debug_mode=True)
 
-# Use with expect.configure()
-debug_expect = expect.configure(timeout=10, polling=0.25, debug_mode=True)
+# Use it per call or pre-apply it with expect.configure()
+expect(element, config=config).to_be_visible()
+debug_expect = expect.configure(config=config)
+debug_expect(element).to_be_visible()
 ```
 
 ::: selenium_expect._config.ExpectConfig
@@ -202,8 +204,8 @@ from selenium_expect import expect, SoftAssertionCollector, assert_all
 
 SoftAssertionCollector.reset()
 
-expect(element).to_be_visible(soft=True)
-expect(element).to_have_text("Hello", soft=True)
+expect(element, soft=True).to_be_visible()
+expect(element, soft=True).to_have_text("Hello")
 
 failures = SoftAssertionCollector.get_failures()
 if failures:
@@ -223,8 +225,8 @@ Raise `AssertionError` if any soft failures were collected, then reset.
 ```python
 from selenium_expect import expect, assert_all
 
-expect(element).to_be_visible(soft=True)
-expect(element).to_have_text("Hello", soft=True)
+expect(element, soft=True).to_be_visible()
+expect(element, soft=True).to_have_text("Hello")
 
 assert_all()  # raises AssertionError with combined message if any failed
 ```
@@ -315,12 +317,14 @@ Assertions for `WebElement` objects. Provides methods for visibility, state, tex
 
 **Key method categories**:
 
-- **State**: `to_be_visible`, `to_be_hidden`, `to_be_present`, `to_be_enabled`, `to_be_disabled`, `to_be_selected`, `to_be_checked`, `to_be_clickable`, `to_be_stale`
-- **Text**: `to_have_text`, `to_have_text_contains`, `to_have_text_matches`, `to_have_trimmed_text`
-- **Attributes**: `to_have_attribute`, `to_have_attribute_present`, `to_have_attribute_absent`, `to_have_class`, `to_have_class_contain`, `to_have_id`, `to_have_value`
-- **CSS**: `to_have_css_property`, `to_have_css_value_contains`
-- **Identity**: `to_have_tag`, `to_have_role`, `to_have_aria_label`, `to_have_aria_describedby`
-- **Position**: `to_have_position`, `to_have_size`, `to_have_rect`
+- **State**: `to_be_visible`, `to_be_hidden`, `to_be_present`, `to_be_absent`, `to_be_enabled`, `to_be_disabled`, `to_be_selected`, `to_be_unselected`, `to_be_checked`, `to_be_unchecked`, `to_be_clickable`, `to_be_editable`, `to_be_readonly`, `to_be_focused`, `to_be_empty`, `to_be_stale`
+- **Text**: `to_have_text`, `to_have_text_contains`, `to_have_text_matches`, `to_have_text_empty`, `to_have_text_not_empty`, `to_have_text_starting_with`, `to_have_text_ending_with`, `to_have_text_in_list`
+- **Attributes**: `to_have_attribute`, `to_have_attribute_present`, `to_have_attribute_absent`, `to_have_attribute_contains`, `to_have_attribute_empty`, `to_have_attribute_in_list`, `to_have_attribute_matches`, `to_have_dom_attribute`, `to_have_dom_attribute_contains`, `to_have_class`, `to_have_class_contains`, `to_contain_class`, `to_have_class_in_list`, `to_have_class_matching`, `to_have_all_classes`, `to_have_id`, `to_have_value`, `to_have_value_contains`, `to_have_value_in_list`, `to_have_value_matches`
+- **CSS**: `to_have_css_property`, `to_have_css_property_contains`, `to_have_css_property_matches`
+- **Identity**: `to_have_tag`, `to_have_aria_role`, `to_have_aria_role_contains`, `to_have_aria_role_in_list`, `to_have_accessible_name`, `to_have_accessible_name_contains`
+- **Position**: `to_have_location`, `to_have_location_x`, `to_have_location_y`, `to_have_location_greater_than`, `to_have_location_less_than`, `to_have_location_once_scrolled_into_view`, `to_have_size`, `to_have_size_width`, `to_have_size_height`, `to_have_size_greater_than`, `to_have_size_less_than`, `to_have_rect`
+- **Properties/JS**: `to_have_property`, `to_have_property_contains`, `to_have_js_property`
+- **Shadow DOM**: `to_have_shadow_root`, `to_have_shadow_root_absent`
 - **Composition**: `to_satisfy_all`, `to_satisfy_any`, `to_satisfy_none`
 
 ::: selenium_expect.assertions.element.ExpectElement
@@ -334,11 +338,11 @@ Assertions for `WebDriver` and page-level state.
 - **Title**: `to_have_title`, `to_have_title_contains`, `to_have_title_matches`
 - **URL**: `to_have_url`, `to_have_url_contains`, `to_have_url_matches`
 - **State**: `to_have_ready_state`
-- **Windows**: `to_have_window_count`, `to_have_window_count_greater_than`, `to_have_window_handles`
-- **Browser**: `to_have_browser_name`, `to_have_capability`
-- **Page source**: `to_have_page_source_contains`
-- **Window geometry**: `to_have_position`, `to_have_size`, `to_have_rect`
-- **Active element**: `to_have_active_element_tag`, `to_have_active_element_attribute`, `to_have_active_element_text`, `to_have_active_element_visible`, `to_have_active_element_enabled`
+- **Windows**: `to_have_window_count`, `to_have_window_count_greater_than`, `to_have_window_count_less_than`, `to_have_window_handle`, `to_have_new_window_opened`
+- **Browser**: `to_have_browser_name`, `to_have_capability`, `to_have_capability_contains`, `to_have_orientation`
+- **Page source**: `to_have_page_source_contains`, `to_have_page_source_matches`, `to_have_page_source_not_contains`
+- **Window geometry**: `to_have_window_position`, `to_have_window_size`, `to_have_window_rect`, `to_have_position`, `to_have_size`, `to_have_rect`
+- **Active element**: `to_have_active_element_tag`, `to_have_active_element_id`, `to_have_active_element_class`
 
 ::: selenium_expect.assertions.driver.ExpectDriver
 
@@ -349,8 +353,8 @@ Assertions for lists of `WebElement` objects.
 **Key method categories**:
 
 - **Count**: `to_have_count`, `to_have_count_greater_than`, `to_have_count_less_than`, `to_have_count_greater_than_or_equal`, `to_have_count_less_than_or_equal`, `to_be_empty`, `to_be_not_empty`
-- **Text**: `to_have_texts`, `to_have_texts_contains`, `to_have_text_at`, `to_have_any_text`, `to_have_all_texts_contain`, `to_have_any_text_contain`, `to_have_none_text_contain`, `to_have_exact_texts`, `to_have_texts_containing`, `to_have_texts_in_any_order`, `to_have_first_text`, `to_have_last_text`, `to_have_nth_text_contains`
-- **Values**: `to_have_values`, `to_have_value_at`
+- **Text**: `to_have_texts`, `to_have_texts_contains`, `to_have_texts_match`, `to_have_text_at`, `to_have_any_text`, `to_have_all_texts_contain`, `to_have_any_text_contain`, `to_have_none_text_contain`, `to_have_exact_texts`, `to_have_texts_containing`, `to_have_texts_in_any_order`, `to_have_first_text`, `to_have_last_text`, `to_have_nth_text_contains`
+- **Values**: `to_have_values`, `to_have_value_at`, `to_have_values_contains`
 - **State**: `to_have_all_visible`, `to_have_any_visible`, `to_have_none_visible`, `to_have_all_enabled`, `to_have_all_selected`
 - **Attributes**: `to_have_attribute_at`, `to_have_all_attribute`, `to_have_any_attribute`
 
@@ -361,6 +365,18 @@ Assertions for lists of `WebElement` objects.
 Assertions for JavaScript `Alert` objects.
 
 **Methods**: `to_be_present`, `to_have_text`, `to_have_text_contains`, `to_have_text_matches`
+
+!!! note "Waiting for an alert"
+
+    `driver.switch_to.alert` raises `NoAlertPresentException` immediately if
+    no alert is present, which bypasses the retry loop. To poll until an
+    alert appears, pass a lazy `Alert` object:
+
+    ```python
+    from selenium.webdriver.common.alert import Alert
+
+    expect(Alert(driver)).to_be_present()  # polls until the alert shows up
+    ```
 
 ::: selenium_expect.assertions.alert.ExpectAlert
 

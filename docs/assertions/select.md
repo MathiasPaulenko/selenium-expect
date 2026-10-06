@@ -127,9 +127,9 @@ expect(select).to_have_selected_count(2)
 
 ### `to_have_selected_index(index)`
 
-Asserts that the first selected option is at `index`.
+Asserts that `select.options[index].is_selected()` is `True`.
 
-**Selenium API**: `select.options.index(first_selected_option)`
+**Selenium API**: `select.options[index].is_selected()`
 
 **Parameters**:
 
@@ -193,21 +193,21 @@ expect(select).to_have_option_count_greater_than(0)
 
 ---
 
-### `to_have_option_at_index(index, value)`
+### `to_have_option_at_index(index, text)`
 
-Asserts that `select.options[index].get_attribute("value")` equals `value`.
+Asserts that `select.options[index].text` equals `text`.
 
-**Selenium API**: `select.options[index].get_attribute("value")`
+**Selenium API**: `select.options[index].text`
 
 **Parameters**:
 
 - `index` (`int`): Option index.
-- `value` (`str`): Expected option value.
+- `text` (`str`): Expected option text.
 
 **Example**:
 
 ```python
-expect(select).to_have_option_at_index(0, "apple")
+expect(select).to_have_option_at_index(0, "Apple")
 ```
 
 ---
@@ -309,10 +309,10 @@ select = Select(driver.find_element(By.ID, "tags"))
 expect(select).to_be_multiple()
 
 # Verify multiple selected values
-expect(select).to_have_selected_values("python", "selenium")
+expect(select).to_have_selected_values(["python", "selenium"])
 
 # Verify multiple selected texts
-expect(select).to_have_selected_texts("Python", "Selenium")
+expect(select).to_have_selected_texts(["Python", "Selenium"])
 
 # Verify the number of selected options
 expect(select).to_have_selected_count(2)

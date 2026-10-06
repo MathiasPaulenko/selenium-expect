@@ -9,8 +9,8 @@ Soft assertions accumulate failures instead of raising immediately. This lets yo
 Pass `soft=True` to any `expect()` call:
 
 ```python
-expect(element).to_be_visible(soft=True)
-expect(element).to_have_text("Hello", soft=True)
+expect(element, soft=True).to_be_visible()
+expect(element, soft=True).to_have_text("Hello")
 ```
 
 ### Global
@@ -30,9 +30,9 @@ Call `assert_all()` to raise a combined `AssertionError` if any failures were co
 ```python
 from selenium_expect import assert_all, expect
 
-expect(element).to_be_visible(soft=True)
-expect(element).to_have_text("Hello", soft=True)
-expect(driver).to_have_title("Dashboard", soft=True)
+expect(element, soft=True).to_be_visible()
+expect(element, soft=True).to_have_text("Hello")
+expect(driver, soft=True).to_have_title("Dashboard")
 
 assert_all()  # raises if any of the above failed
 ```
@@ -64,15 +64,22 @@ SoftAssertionCollector.get_failures()    # return list of failure messages
 SoftAssertionCollector.assert_all()      # raise + reset
 ```
 
+!!! note "Context isolation"
+
+    The collector stores failures per thread/async context (`ContextVar`),
+    so parallel tests don't leak failures into each other. Within a test,
+    call `SoftAssertionCollector.reset()` (or rely on `assert_all()`, which
+    resets after raising) between assertions runs.
+
 ## Pattern: test with soft assertions
 
 ```python
 def test_form_validation(driver):
     SoftAssertionCollector.reset()
 
-    expect(driver.find_element(By.ID, "name")).to_have_value("John", soft=True)
-    expect(driver.find_element(By.ID, "email")).to_have_value("john@example.com", soft=True)
-    expect(driver.find_element(By.ID, "phone")).to_have_value("+1234567890", soft=True)
+    expect(driver.find_element(By.ID, "name"), soft=True).to_have_value("John")
+    expect(driver.find_element(By.ID, "email"), soft=True).to_have_value("john@example.com")
+    expect(driver.find_element(By.ID, "phone"), soft=True).to_have_value("+1234567890")
 
     assert_all()
 ```
@@ -93,11 +100,11 @@ def test_profile_page(driver):
     driver.get("https://app.example.com/profile")
 
     # All assertions run even if some fail
-    expect(driver).to_have_title("Profile", soft=True)
-    expect(driver.find_element(By.ID, "name")).to_have_text("John Doe", soft=True)
-    expect(driver.find_element(By.ID, "email")).to_have_text_contains("john", soft=True)
-    expect(driver.find_element(By.ID, "avatar")).to_be_visible(soft=True)
-    expect(driver.find_element(By.ID, "edit-btn")).to_be_clickable(soft=True)
+    expect(driver, soft=True).to_have_title("Profile")
+    expect(driver.find_element(By.ID, "name"), soft=True).to_have_text("John Doe")
+    expect(driver.find_element(By.ID, "email"), soft=True).to_have_text_contains("john")
+    expect(driver.find_element(By.ID, "avatar"), soft=True).to_be_visible()
+    expect(driver.find_element(By.ID, "edit-btn"), soft=True).to_be_clickable()
 
     # Raise if any failed
     assert_all()
@@ -111,9 +118,9 @@ def test_checkout(driver):
     expect(driver).to_have_url_contains("/checkout")
 
     # Soft assertions — collect all failures
-    expect(driver.find_element(By.ID, "total")).to_have_text("$99.99", soft=True)
-    expect(driver.find_element(By.ID, "item-count")).to_have_text("3 items", soft=True)
-    expect(driver.find_element(By.ID, "shipping")).to_have_text("Free", soft=True)
+    expect(driver.find_element(By.ID, "total"), soft=True).to_have_text("$99.99")
+    expect(driver.find_element(By.ID, "item-count"), soft=True).to_have_text("3 items")
+    expect(driver.find_element(By.ID, "shipping"), soft=True).to_have_text("Free")
 
     assert_all()
 ```

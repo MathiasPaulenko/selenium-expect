@@ -20,7 +20,7 @@ Fluent `expect()` assertions with auto-retry for Selenium Python. Standalone, no
 - **Custom matchers** — extend `expect()` with your own assertions via `@extend`
 - **Locator re-find** — `expect(driver, by=By.ID, value="x")` re-finds on each poll
 - **Polling** — fixed interval or backoff schedule
-- **150+ assertions** — elements, lists, cookies, alerts, JS state, shadow DOM, select, iframe, window
+- **190+ assertions** — elements, lists, cookies, alerts, JS state, shadow DOM, select, iframe, window
 - **Descriptive errors** — timeline, HTML snippet, poll count, custom messages
 - **Zero dependencies** — only requires Selenium 4.10+
 - **Fully typed** — `py.typed` included, strict mypy clean
@@ -147,7 +147,7 @@ expect(element).to_have_text("Ready", polling=0.1)
 expect(element).to_be_clickable(polling=[0.05, 0.1, 0.5, 1.0])
 
 # Custom error message
-expect(element).to_have_text("Hello", message="Greeting should say Hello")
+expect(element, message="Greeting should say Hello").to_have_text("Hello")
 
 # Soft assertion (accumulate failures, check later)
 expect(element, soft=True).to_be_visible()
@@ -232,7 +232,7 @@ slow_expect(driver).to_have_title("Slow Page")
 | `to_have_text_not_empty()` | `element.text != ''` |
 | `to_have_text_starting_with(prefix)` | `element.text.startswith(prefix)` |
 | `to_have_text_ending_with(suffix)` | `element.text.endswith(suffix)` |
-| `to_have_text_in_list(texts)` | `element.text in texts` |
+| `to_have_text_in_list(*texts)` | `element.text in texts` |
 | `to_have_value(value)` | `element.get_attribute('value')` |
 | `to_have_value_contains(value)` | `value in element.get_attribute('value')` |
 | `to_have_value_matches(pattern)` | `re.search(pattern, element.get_attribute('value'))` |
@@ -272,8 +272,8 @@ slow_expect(driver).to_have_title("Slow Page")
 | `to_have_class_contains(class_name)` | `class_name in element.get_attribute('class')` |
 | `to_contain_class(class_name)` | `class_name in element.get_attribute('class')` |
 | `to_have_class_matching(pattern)` | `re.search(pattern, class) for class in classes` |
-| `to_have_all_classes(classes)` | `set(classes).issubset(elem_classes)` |
-| `to_have_class_in_list(classes)` | `any(class in elem_classes for class in classes)` |
+| `to_have_all_classes(*classes)` | `set(classes).issubset(elem_classes)` |
+| `to_have_class_in_list(*classes)` | `any(class in elem_classes for class in classes)` |
 
 ### Element — Position / Dimensions
 
@@ -298,10 +298,15 @@ slow_expect(driver).to_have_title("Slow Page")
 |---|---|
 | `to_have_aria_role(role)` | `element.aria_role` |
 | `to_have_aria_role_contains(role)` | `role in element.aria_role` |
-| `to_have_aria_role_in_list(roles)` | `element.aria_role in roles` |
+| `to_have_aria_role_in_list(*roles)` | `element.aria_role in roles` |
 | `to_have_accessible_name(name)` | `element.accessible_name` |
 | `to_have_accessible_name_contains(name)` | `name in element.accessible_name` |
-| `to_have_js_property(name, value)` | `element.get_property(name)` via JS |
+
+### Element — JavaScript / Shadow DOM
+
+| Assertion | Selenium API |
+|---|---|
+| `to_have_js_property(name, value)` | `element[name]` via `execute_script` |
 | `to_have_shadow_root()` | `element.shadow_root is not None` |
 | `to_have_shadow_root_absent()` | `element.shadow_root is None` |
 
@@ -318,9 +323,10 @@ slow_expect(driver).to_have_title("Slow Page")
 | `to_be_not_empty()` | `len(elements) > 0` |
 | `to_have_texts(texts)` | `[el.text for el in elements]` |
 | `to_have_texts_contains(texts)` | substring per element |
-| `to_have_exact_texts(texts)` | exact text per element |
-| `to_have_texts_containing(texts)` | each text contains substring |
-| `to_have_texts_in_any_order(texts)` | same texts, any order |
+| `to_have_texts_match(patterns)` | `re.search(pattern, el.text)` per element |
+| `to_have_exact_texts(*texts)` | exact text per element |
+| `to_have_texts_containing(*texts)` | each text contains substring |
+| `to_have_texts_in_any_order(*texts)` | same texts, any order |
 | `to_have_text_at(index, text)` | `elements[index].text` |
 | `to_have_first_text(text)` | `elements[0].text` |
 | `to_have_last_text(text)` | `elements[-1].text` |
@@ -330,6 +336,7 @@ slow_expect(driver).to_have_title("Slow Page")
 | `to_have_any_text_contain(text)` | any element contains text |
 | `to_have_none_text_contain(text)` | no element contains text |
 | `to_have_values(values)` | `[el.get_attribute('value') for el in elements]` |
+| `to_have_values_contains(values)` | substring per element `get_attribute('value')` |
 | `to_have_value_at(index, value)` | `elements[index].get_attribute('value')` |
 | `to_have_all_visible()` | all `is_displayed()` |
 | `to_have_any_visible()` | any `is_displayed()` |
@@ -421,9 +428,9 @@ slow_expect(driver).to_have_title("Slow Page")
 | `to_have_frame_available(frame_id)` | `driver.switch_to.frame(frame_id)` |
 | `to_have_frame_count(n)` | `len(driver.find_elements(By.TAG_NAME, 'iframe'))` |
 | `to_have_frame_count_greater_than(n)` | `len(driver.find_elements(By.TAG_NAME, 'iframe')) > n` |
-| `to_have_frame_text(frame_id, text)` | switch to frame, check page_source |
-| `to_be_in_frame(frame_id)` | `driver.switch_to.frame(frame_id)` succeeds |
-| `to_be_in_default_content()` | `driver.switch_to.default_content()` succeeds |
+| `to_have_frame_text(frame_id, text)` | switch to frame, `text in driver.page_source`, switch back |
+| `to_be_in_frame()` | `window.frameElement !== null` via JS |
+| `to_be_in_default_content()` | `window.frameElement === null` via JS |
 
 ### Window
 
@@ -560,19 +567,19 @@ expect(element).to_satisfy_none(
 ## Comparison
 
 | Feature | selenium-expect | WebDriverWait + EC | Selenium IDE |
-|---|---|---|---|---|
+|---|---|---|---|
 | Auto-retry | Yes | Yes (explicit) | No |
 | Fluent API | Yes | No | No |
-| Negation | Yes (`.not_`) | Manual | Yes (`.not_`) | No |
-| Soft assertions | Yes | No | No | No |
-| Custom matchers | Yes | No | Yes | No |
-| Locator re-find | Yes | Manual | Built-in | No |
-| Lists | Yes | Manual | Yes | No |
-| Cookies | Yes | No | No | No |
-| JS state | Yes | No | No | No |
-| Shadow DOM | Yes | No | Yes | No |
-| Select/dropdown | Yes | No | Yes | No |
-| Alerts | Yes | Yes | No |
+| Negation | Yes (`.not_`) | Manual | Partial |
+| Soft assertions | Yes | No | No |
+| Custom matchers | Yes | No | No |
+| Locator re-find | Yes | Manual | Built-in |
+| Lists | Yes | Manual | No |
+| Cookies | Yes | No | No |
+| JS state | Yes | No | Yes |
+| Shadow DOM | Yes | No | Partial |
+| Select/dropdown | Yes | No | Yes |
+| Alerts | Yes | Yes | Yes |
 | Configurable polling | Yes (fixed + backoff) | Fixed | No |
 | Descriptive errors | Yes (timeline + HTML) | Basic | Basic |
 | Framework dependency | None | Selenium | IDE |
@@ -585,13 +592,13 @@ expect(element).to_satisfy_none(
 selenium-expect produces descriptive, multi-line error messages:
 
 ```text
-AssertionError: Expected element to have text "Loaded!", but got "Loading..."
+AssertionError: Expected <div id='status'> to have text 'Loaded!', but got Loading...
   Expected: Loaded!
   Actual:   Loading...
   Element:  <div id="status" class="loading">Loading...</div>
   Waited:   5001ms (10 polls at 0.5s interval)
   Message:  Status should show Loaded! after AJAX completes
-  Timeline: [poll 1: Loading..., poll 2: Loading..., ..., poll 10: Loading...]
+  Timeline: [poll 6: Loading..., poll 7: Loading..., poll 8: Loading..., poll 9: Loading..., poll 10: Loading...]
 ```
 
 ---

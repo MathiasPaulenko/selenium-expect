@@ -246,18 +246,13 @@ def step_welcome(context, name):
 When an assertion fails, the error message includes a timeline, the expected vs. actual values, and (for elements) an HTML snippet:
 
 ```text
-AssertionError: Expected element to be visible
-  Entity: <h1 id="title">
+AssertionError: Expected <h1 id='title'> to be visible, but got False
   Expected: True
   Actual:   False
-  Timeout:  5.00s (10 polls × 0.50s)
-  Timeline:
-    [0.00s] not visible
-    [0.50s] not visible
-    [1.00s] not visible
-    ...
-    [5.00s] not visible
-  Message: custom message here (if provided)
+  Element:  <h1 id="title">Heading</h1>
+  Waited:   5012ms (10 polls at 0.5s interval)
+  Message:  custom message here (if provided)
+  Timeline: [poll 6: False, poll 7: False, poll 8: False, poll 9: False, poll 10: False]
 ```
 
 See [Error messages](guide/error-messages.md) for full details.
