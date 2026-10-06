@@ -18,15 +18,12 @@ from selenium_expect.assertions._base import AssertionMixin
 
 
 def _resolve_target_type(target: Any) -> str:
-    """Determine the registry type name for *target*.
-
-    Select is checked before WebElement because Select wraps a WebElement.
-    """
+    """Determine the registry type name for *target*."""
     if isinstance(target, Select):
         return "Select"
     if isinstance(target, WebElement):
         return "WebElement"
-    if isinstance(target, list):
+    if isinstance(target, (list, tuple)):
         return "list"
     if isinstance(target, WebDriver):
         return "WebDriver"
@@ -40,6 +37,29 @@ def _resolve_target_type(target: Any) -> str:
     if cls_name == "Alert":
         return "Alert"
     return cls_name
+
+
+def _effective_config(
+    config: ExpectConfig | None,
+    timeout: float | None,
+    polling: float | list[float] | None,
+    soft: bool | None,
+) -> ExpectConfig:
+    """Return *config* (or the global config) with per-call overrides applied."""
+    effective_config = config if config is not None else get_config()
+    if timeout is None and polling is None and soft is None:
+        return effective_config
+    overrides: dict[str, Any] = {}
+    if timeout is not None:
+        overrides["timeout"] = normalize_timeout(timeout)
+    if polling is not None:
+        if isinstance(polling, list):
+            overrides["polling_intervals"] = polling
+        else:
+            overrides["polling_interval"] = normalize_timeout(polling)
+    if soft is not None:
+        overrides["soft_mode"] = soft
+    return effective_config.replace(**overrides)
 
 
 class Expect:
@@ -89,19 +109,7 @@ class Expect:
             if not isinstance(target, WebDriver):
                 raise TypeError("expect() with by/value requires a WebDriver target")
 
-            effective_config = config if config is not None else get_config()
-            if timeout is not None or polling is not None or soft is not None:
-                overrides: dict[str, Any] = {}
-                if timeout is not None:
-                    overrides["timeout"] = normalize_timeout(timeout)
-                if polling is not None:
-                    if isinstance(polling, list):
-                        overrides["polling_intervals"] = polling
-                    else:
-                        overrides["polling_interval"] = polling
-                if soft is not None:
-                    overrides["soft_mode"] = soft
-                effective_config = effective_config.replace(**overrides)
+            effective_config = _effective_config(config, timeout, polling, soft)
 
             return LocatorExpect(
                 driver=target,
@@ -121,20 +129,7 @@ class Expect:
 
         assertion_cls = cast(type[AssertionMixin], cls)
 
-        effective_config = config if config is not None else get_config()
-
-        if timeout is not None or polling is not None or soft is not None:
-            cfg_overrides: dict[str, Any] = {}
-            if timeout is not None:
-                cfg_overrides["timeout"] = normalize_timeout(timeout)
-            if polling is not None:
-                if isinstance(polling, list):
-                    cfg_overrides["polling_intervals"] = polling
-                else:
-                    cfg_overrides["polling_interval"] = polling
-            if soft is not None:
-                cfg_overrides["soft_mode"] = soft
-            effective_config = effective_config.replace(**cfg_overrides)
+        effective_config = _effective_config(config, timeout, polling, soft)
 
         return assertion_cls(target=target, config=effective_config, message=message)
 
@@ -175,6 +170,19 @@ class Expect:
             merged: dict[str, Any] = {**defaults, **overrides}
             return self(target, **merged)
 
+        def _configured_poll(
+            fn: Callable[[], Any],
+            /,
+            **overrides: Any,
+        ) -> PollAssertion:
+            poll_keys = ("timeout", "polling", "config")
+            merged = {
+                **{k: v for k, v in defaults.items() if k in poll_keys},
+                **overrides,
+            }
+            return self.poll(fn, **merged)
+
+        _configured_expect.poll = _configured_poll  # type: ignore[attr-defined]
         return _configured_expect
 
 

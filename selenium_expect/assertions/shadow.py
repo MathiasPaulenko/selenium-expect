@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Self
 
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.remote.shadowroot import ShadowRoot
@@ -31,7 +31,7 @@ class ExpectShadow(AssertionMixin):
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert shadow_root.find_element(by, value) doesn't raise."""
         shadow = self._target
 
@@ -51,6 +51,8 @@ class ExpectShadow(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_have_element_count(
         self,
         by: str,
@@ -59,7 +61,7 @@ class ExpectShadow(AssertionMixin):
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert len(shadow_root.find_elements(by, value)) == count."""
         shadow = self._target
 
@@ -76,6 +78,8 @@ class ExpectShadow(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_have_element_text(
         self,
         by: str,
@@ -84,7 +88,7 @@ class ExpectShadow(AssertionMixin):
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert shadow_root.find_element(by, value).text == text."""
         shadow = self._target
 
@@ -105,6 +109,8 @@ class ExpectShadow(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_have_element_attribute(
         self,
         by: str,
@@ -114,7 +120,7 @@ class ExpectShadow(AssertionMixin):
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert shadow_root.find_element(by, value).get_attribute(attr) == attr_value."""
         shadow = self._target
 
@@ -135,6 +141,8 @@ class ExpectShadow(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_have_element_visible(
         self,
         by: str,
@@ -142,7 +150,7 @@ class ExpectShadow(AssertionMixin):
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert shadow_root.find_element(by, value).is_displayed() == True."""
         shadow = self._target
 
@@ -162,6 +170,8 @@ class ExpectShadow(AssertionMixin):
             timeout=timeout,
             polling=polling,
         )
+
+        return self
 
     # --- Overrides ---
 

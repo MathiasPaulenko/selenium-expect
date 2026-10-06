@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from typing import Any
+import re
+from typing import Any, Self
 
 from selenium.webdriver.remote.webelement import WebElement
 
@@ -31,7 +32,7 @@ class ExpectList(AssertionMixin):
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert len(elements) == count."""
         elements = self._target
 
@@ -48,13 +49,15 @@ class ExpectList(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_have_count_greater_than(
         self,
         n: int,
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert len(elements) > n."""
         elements = self._target
 
@@ -71,13 +74,15 @@ class ExpectList(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_have_count_less_than(
         self,
         n: int,
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert len(elements) < n."""
         elements = self._target
 
@@ -94,13 +99,15 @@ class ExpectList(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_have_count_greater_than_or_equal(
         self,
         n: int,
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert len(elements) >= n."""
         elements = self._target
 
@@ -117,13 +124,15 @@ class ExpectList(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_have_count_less_than_or_equal(
         self,
         n: int,
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert len(elements) <= n."""
         elements = self._target
 
@@ -140,12 +149,14 @@ class ExpectList(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_be_empty(
         self,
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert len(elements) == 0."""
         elements = self._target
 
@@ -162,12 +173,14 @@ class ExpectList(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_be_not_empty(
         self,
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert len(elements) > 0."""
         elements = self._target
 
@@ -184,6 +197,8 @@ class ExpectList(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     # --- Text ---
 
     def to_have_texts(
@@ -192,7 +207,7 @@ class ExpectList(AssertionMixin):
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert [el.text for el in elements] == texts (exact, ordered)."""
         if not texts:
             raise ValueError("texts list must not be empty")
@@ -211,13 +226,15 @@ class ExpectList(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_have_texts_contains(
         self,
         texts: list[str],
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert each text in texts is in corresponding element.text."""
         if not texts:
             raise ValueError("texts list must not be empty")
@@ -238,6 +255,43 @@ class ExpectList(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
+    def to_have_texts_match(
+        self,
+        patterns: list[str],
+        *,
+        timeout: float | None = None,
+        polling: float | list[float] | None = None,
+    ) -> Self:
+        """Assert each element's text matches the corresponding regex pattern."""
+        if not patterns:
+            raise ValueError("patterns list must not be empty")
+        elements = self._target
+
+        def condition() -> tuple[bool, Any]:
+            actual = [el.text for el in elements]
+            if len(actual) != len(patterns):
+                return (False, actual)
+            return (
+                all(
+                    re.search(p, a or "") is not None
+                    for a, p in zip(actual, patterns, strict=False)
+                ),
+                actual,
+            )
+
+        self._run_assertion(
+            condition=condition,
+            condition_name=f"to have texts matching {patterns!r}",
+            expected=patterns,
+            entity="list",
+            timeout=timeout,
+            polling=polling,
+        )
+
+        return self
+
     def to_have_text_at(
         self,
         index: int,
@@ -245,7 +299,7 @@ class ExpectList(AssertionMixin):
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert elements[index].text == text."""
         elements = self._target
 
@@ -264,13 +318,15 @@ class ExpectList(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_have_any_text(
         self,
         text: str,
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert any element has text == text."""
         elements = self._target
 
@@ -287,13 +343,15 @@ class ExpectList(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_have_all_texts_contain(
         self,
         text: str,
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert all elements contain text."""
         elements = self._target
 
@@ -310,13 +368,15 @@ class ExpectList(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_have_any_text_contain(
         self,
         text: str,
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert any element contains text."""
         elements = self._target
 
@@ -333,13 +393,15 @@ class ExpectList(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_have_none_text_contain(
         self,
         text: str,
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert no element contains text."""
         elements = self._target
 
@@ -356,12 +418,14 @@ class ExpectList(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_have_exact_texts(
         self,
         *texts: str,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert [el.text for el in elements] == list(texts) (exact, ordered, varargs)."""
         if not texts:
             raise ValueError("At least one text must be provided")
@@ -381,12 +445,14 @@ class ExpectList(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_have_texts_containing(
         self,
         *texts: str,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert each element.text contains the corresponding text (varargs)."""
         if not texts:
             raise ValueError("At least one text must be provided")
@@ -408,12 +474,14 @@ class ExpectList(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_have_texts_in_any_order(
         self,
         *texts: str,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert element texts match texts in any order (varargs)."""
         if not texts:
             raise ValueError("At least one text must be provided")
@@ -433,13 +501,15 @@ class ExpectList(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_have_first_text(
         self,
         text: str,
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert elements[0].text == text."""
         elements = self._target
 
@@ -458,13 +528,15 @@ class ExpectList(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_have_last_text(
         self,
         text: str,
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert elements[-1].text == text."""
         elements = self._target
 
@@ -483,6 +555,8 @@ class ExpectList(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_have_nth_text_contains(
         self,
         index: int,
@@ -490,7 +564,7 @@ class ExpectList(AssertionMixin):
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert text in elements[index].text."""
         elements = self._target
 
@@ -509,6 +583,8 @@ class ExpectList(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     # --- Values ---
 
     def to_have_values(
@@ -517,7 +593,7 @@ class ExpectList(AssertionMixin):
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert [el.get_attribute('value') for el in elements] == values."""
         if not values:
             raise ValueError("values list must not be empty")
@@ -536,6 +612,37 @@ class ExpectList(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
+    def to_have_values_contains(
+        self,
+        values: list[str],
+        *,
+        timeout: float | None = None,
+        polling: float | list[float] | None = None,
+    ) -> Self:
+        """Assert each value is a substring of the corresponding element's value."""
+        if not values:
+            raise ValueError("values list must not be empty")
+        elements = self._target
+
+        def condition() -> tuple[bool, Any]:
+            actual = [el.get_attribute("value") for el in elements]
+            if len(actual) != len(values):
+                return (False, actual)
+            return (all(v in (a or "") for a, v in zip(actual, values, strict=False)), actual)
+
+        self._run_assertion(
+            condition=condition,
+            condition_name=f"to have values containing {values!r}",
+            expected=values,
+            entity="list",
+            timeout=timeout,
+            polling=polling,
+        )
+
+        return self
+
     def to_have_value_at(
         self,
         index: int,
@@ -543,7 +650,7 @@ class ExpectList(AssertionMixin):
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert elements[index].get_attribute('value') == value."""
         elements = self._target
 
@@ -562,6 +669,8 @@ class ExpectList(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     # --- State (aggregate) ---
 
     def to_have_all_visible(
@@ -569,7 +678,7 @@ class ExpectList(AssertionMixin):
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert all elements are visible."""
         elements = self._target
 
@@ -586,12 +695,14 @@ class ExpectList(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_have_any_visible(
         self,
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert at least one element is visible."""
         elements = self._target
 
@@ -608,12 +719,14 @@ class ExpectList(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_have_none_visible(
         self,
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert no element is visible."""
         elements = self._target
 
@@ -630,12 +743,14 @@ class ExpectList(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_have_all_enabled(
         self,
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert all elements are enabled."""
         elements = self._target
 
@@ -652,12 +767,14 @@ class ExpectList(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_have_all_selected(
         self,
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert all elements are selected."""
         elements = self._target
 
@@ -674,6 +791,8 @@ class ExpectList(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     # --- Attributes ---
 
     def to_have_attribute_at(
@@ -684,7 +803,7 @@ class ExpectList(AssertionMixin):
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert elements[index].get_attribute(name) == value."""
         elements = self._target
 
@@ -703,6 +822,8 @@ class ExpectList(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_have_all_attribute(
         self,
         name: str,
@@ -710,7 +831,7 @@ class ExpectList(AssertionMixin):
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert all elements have attribute == value."""
         elements = self._target
 
@@ -727,6 +848,8 @@ class ExpectList(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_have_any_attribute(
         self,
         name: str,
@@ -734,7 +857,7 @@ class ExpectList(AssertionMixin):
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert any element has attribute == value."""
         elements = self._target
 
@@ -750,6 +873,8 @@ class ExpectList(AssertionMixin):
             timeout=timeout,
             polling=polling,
         )
+
+        return self
 
     # --- Overrides ---
 

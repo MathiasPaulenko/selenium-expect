@@ -74,7 +74,13 @@ def extend(name: str) -> Callable[[_MatcherFn], _MatcherFn]:
     first argument and must return a ``(bool, Any)`` tuple where the
     bool indicates pass/fail and the Any is the actual value for
     error reporting.
+
+    *name* must be a valid public identifier. If it collides with an
+    existing assertion method (e.g. ``to_be_visible``), the built-in
+    method takes precedence on assertion classes that define it.
     """
+    if not name.isidentifier() or name.startswith("_"):
+        raise ValueError(f"Invalid matcher name: {name!r}")
 
     def decorator(fn: Callable[..., tuple[bool, Any]]) -> Callable[..., tuple[bool, Any]]:
         CustomMatcherRegistry.register(name, fn)

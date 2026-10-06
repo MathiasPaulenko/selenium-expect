@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import re
-from typing import Any
+from typing import Any, Self
 
 from selenium.common.exceptions import NoAlertPresentException
 from selenium.webdriver.common.alert import Alert
@@ -30,7 +30,7 @@ class ExpectAlert(AssertionMixin):
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert alert is present (accessing .text doesn't raise)."""
         alert = self._target
 
@@ -50,13 +50,15 @@ class ExpectAlert(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_have_text(
         self,
         text: str,
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert alert.text == text."""
         alert = self._target
 
@@ -73,13 +75,15 @@ class ExpectAlert(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_have_text_contains(
         self,
         text: str,
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert text in alert.text."""
         alert = self._target
 
@@ -96,13 +100,15 @@ class ExpectAlert(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_have_text_matches(
         self,
         pattern: str,
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert re.search(pattern, alert.text)."""
         alert = self._target
 
@@ -118,6 +124,8 @@ class ExpectAlert(AssertionMixin):
             timeout=timeout,
             polling=polling,
         )
+
+        return self
 
     # --- Overrides ---
 

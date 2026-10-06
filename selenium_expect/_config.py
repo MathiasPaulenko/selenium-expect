@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from dataclasses import dataclass
 from dataclasses import replace as _replace
 from typing import Any
@@ -10,10 +11,10 @@ from typing import Any
 def normalize_timeout(timeout: float) -> float:
     """Convert timeout to seconds.
 
-    If *timeout* is an int >= 1000, it is interpreted as milliseconds.
-    Floats and ints < 1000 are treated as seconds.
+    Any value >= 1000 is interpreted as milliseconds; smaller values
+    are treated as seconds.
     """
-    if isinstance(timeout, int) and timeout >= 1000:
+    if timeout >= 1000:
         return timeout / 1000.0
     return float(timeout)
 
@@ -28,7 +29,7 @@ class ExpectConfig:
 
     timeout: float = 5.0
     polling_interval: float = 0.5
-    polling_intervals: list[float] | None = None
+    polling_intervals: Sequence[float] | None = None
     screenshot_on_failure: bool = False
     screenshot_path: str | None = None
     debug_mode: bool = False
@@ -40,6 +41,8 @@ class ExpectConfig:
         if self.polling_interval < 0:
             raise ValueError(f"polling_interval must be >= 0, got {self.polling_interval}")
         if self.polling_intervals is not None:
+            # Store as tuple so the frozen dataclass is truly immutable.
+            object.__setattr__(self, "polling_intervals", tuple(self.polling_intervals))
             if len(self.polling_intervals) == 0:
                 raise ValueError("polling_intervals must not be empty; use None for fixed interval")
             for i, interval in enumerate(self.polling_intervals):
@@ -57,7 +60,7 @@ _global_config: ExpectConfig = ExpectConfig()
 def set_default_timeout(seconds: float) -> None:
     """Set the default timeout for all expect assertions.
 
-    If *seconds* is an int >= 1000, it is interpreted as milliseconds
+    Any value >= 1000 is interpreted as milliseconds
     (consistent with ``expect(timeout=...)``).
     """
     global _global_config
@@ -70,7 +73,7 @@ def set_default_polling_interval(seconds: float) -> None:
     _global_config = _global_config.replace(polling_interval=seconds)
 
 
-def set_default_polling_intervals(intervals: list[float]) -> None:
+def set_default_polling_intervals(intervals: Sequence[float]) -> None:
     """Set a backoff schedule for polling intervals."""
     global _global_config
     _global_config = _global_config.replace(polling_intervals=intervals)

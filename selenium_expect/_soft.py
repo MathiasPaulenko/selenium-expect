@@ -3,39 +3,59 @@
 Accumulates assertion failures when ``soft_mode=True`` instead of raising
 immediately. ``assert_all()`` raises a combined ``AssertionError`` if any
 failures were collected.
+
+The failure list is isolated per thread/async context via ``ContextVar``,
+so parallel tests do not leak failures into each other.
 """
 
 from __future__ import annotations
 
+from contextvars import ContextVar
 from typing import ClassVar
 
 
 class SoftAssertionCollector:
-    """Collects soft assertion failures for deferred raising."""
+    """Collects soft assertion failures for deferred raising.
 
-    _failures: ClassVar[list[str]] = []
+    Failures are stored per execution context (``ContextVar``): each
+    thread and each async task has its own list.
+    """
+
+    _failures: ClassVar[ContextVar[list[str] | None]] = ContextVar(
+        "soft_assertion_failures", default=None
+    )
+
+    @classmethod
+    def _current(cls) -> list[str]:
+        """Return this context's failure list, creating it on first use."""
+        failures = cls._failures.get()
+        if failures is None:
+            failures = []
+            cls._failures.set(failures)
+        return failures
 
     @classmethod
     def add_failure(cls, message: str) -> None:
         """Record a soft assertion failure."""
-        cls._failures.append(message)
+        cls._current().append(message)
 
     @classmethod
     def get_failures(cls) -> list[str]:
-        """Return all collected failures."""
-        return list(cls._failures)
+        """Return all collected failures in this context."""
+        return list(cls._current())
 
     @classmethod
     def reset(cls) -> None:
-        """Clear all collected failures."""
-        cls._failures.clear()
+        """Clear all collected failures in this context."""
+        cls._failures.set([])
 
     @classmethod
     def assert_all(cls) -> None:
         """Raise ``AssertionError`` if any failures were collected, then reset."""
-        if not cls._failures:
+        failures = cls._current()
+        if not failures:
             return
-        messages = list(cls._failures)
+        messages = list(failures)
         cls.reset()
         combined = "\n---\n".join(messages)
         raise AssertionError(f"Soft assertion failures ({len(messages)}):\n{combined}")

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Self
 
 from selenium.webdriver.support.ui import Select
 
@@ -29,7 +29,7 @@ class ExpectSelect(AssertionMixin):
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert select.first_selected_option.get_attribute('value') == value."""
         select = self._target
 
@@ -46,13 +46,15 @@ class ExpectSelect(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_have_first_selected_value(
         self,
         value: str,
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert select.first_selected_option.get_attribute('value') == value (alias)."""
         select = self._target
 
@@ -69,13 +71,15 @@ class ExpectSelect(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_have_selected_text(
         self,
         text: str,
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert select.first_selected_option.text == text."""
         select = self._target
 
@@ -92,13 +96,15 @@ class ExpectSelect(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_have_selected_values(
         self,
         values: list[str],
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert [opt.get_attribute('value') for opt in all_selected_options] == values."""
         if not values:
             raise ValueError("values list must not be empty")
@@ -117,13 +123,15 @@ class ExpectSelect(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_have_selected_texts(
         self,
         texts: list[str],
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert [opt.text for opt in all_selected_options] == texts."""
         if not texts:
             raise ValueError("texts list must not be empty")
@@ -142,13 +150,15 @@ class ExpectSelect(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_have_selected_count(
         self,
         count: int,
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert len(select.all_selected_options) == count."""
         select = self._target
 
@@ -165,13 +175,15 @@ class ExpectSelect(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_have_option_count(
         self,
         count: int,
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert len(select.options) == count."""
         select = self._target
 
@@ -188,13 +200,15 @@ class ExpectSelect(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_have_option_count_greater_than(
         self,
         n: int,
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert len(select.options) > n."""
         select = self._target
 
@@ -211,6 +225,8 @@ class ExpectSelect(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_have_option_at_index(
         self,
         index: int,
@@ -218,7 +234,7 @@ class ExpectSelect(AssertionMixin):
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert select.options[index].text == text."""
         select = self._target
 
@@ -237,13 +253,15 @@ class ExpectSelect(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_have_option(
         self,
         value: str,
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert value exists in select options (by value attribute)."""
         select = self._target
 
@@ -260,13 +278,15 @@ class ExpectSelect(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_have_option_text(
         self,
         text: str,
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert text exists in select options (by visible text)."""
         select = self._target
 
@@ -283,12 +303,14 @@ class ExpectSelect(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_be_multiple(
         self,
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert select.is_multiple == True."""
         select = self._target
 
@@ -305,12 +327,14 @@ class ExpectSelect(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_be_single_select(
         self,
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert select.is_multiple == False."""
         select = self._target
 
@@ -327,13 +351,15 @@ class ExpectSelect(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_have_selected_index(
         self,
         index: int,
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert select.options[index].is_selected() == True."""
         select = self._target
 
@@ -352,12 +378,14 @@ class ExpectSelect(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_have_no_selection(
         self,
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert select.all_selected_options is empty."""
         select = self._target
 
@@ -373,6 +401,8 @@ class ExpectSelect(AssertionMixin):
             timeout=timeout,
             polling=polling,
         )
+
+        return self
 
     # --- Overrides ---
 

@@ -8,7 +8,8 @@ the condition check to the corresponding ``ExpectElement`` method.
 
 from __future__ import annotations
 
-from typing import Any
+from collections.abc import Callable
+from typing import Any, Self
 
 from selenium.common.exceptions import NoSuchElementException, StaleElementReferenceException
 from selenium.webdriver.remote.webdriver import WebDriver
@@ -58,6 +59,72 @@ class LocatorExpect(AssertionMixin):
             negate=not self._negate,
         )
 
+    def to_satisfy_all(self, *conditions: Callable[[Any], None]) -> Self:
+        """Assert all conditions pass on the re-found element (AND)."""
+        from selenium_expect._compose import satisfy_all
+
+        def condition() -> tuple[bool, Any]:
+            el = self._find_element()
+            if el is None:
+                return (False, "element not found")
+            try:
+                satisfy_all(el, *conditions, message=self._message)
+                return (True, "all pass")
+            except AssertionError as exc:
+                return (False, str(exc))
+
+        self._run_assertion(
+            condition=condition,
+            condition_name="to_satisfy_all",
+            expected="all pass",
+            entity=self._entity_description(),
+        )
+        return self
+
+    def to_satisfy_any(self, *conditions: Callable[[Any], None]) -> Self:
+        """Assert at least one condition passes on the re-found element (OR)."""
+        from selenium_expect._compose import satisfy_any
+
+        def condition() -> tuple[bool, Any]:
+            el = self._find_element()
+            if el is None:
+                return (False, "element not found")
+            try:
+                satisfy_any(el, *conditions, message=self._message)
+                return (True, "at least one pass")
+            except AssertionError as exc:
+                return (False, str(exc))
+
+        self._run_assertion(
+            condition=condition,
+            condition_name="to_satisfy_any",
+            expected="at least one pass",
+            entity=self._entity_description(),
+        )
+        return self
+
+    def to_satisfy_none(self, *conditions: Callable[[Any], None]) -> Self:
+        """Assert no condition passes on the re-found element (NOT)."""
+        from selenium_expect._compose import satisfy_none
+
+        def condition() -> tuple[bool, Any]:
+            el = self._find_element()
+            if el is None:
+                return (False, "element not found")
+            try:
+                satisfy_none(el, *conditions, message=self._message)
+                return (True, "none pass")
+            except AssertionError as exc:
+                return (False, str(exc))
+
+        self._run_assertion(
+            condition=condition,
+            condition_name="to_satisfy_none",
+            expected="none pass",
+            entity=self._entity_description(),
+        )
+        return self
+
     def _entity_description(self) -> str:
         return f"locator({self._by}={self._value!r})"
 
@@ -95,7 +162,7 @@ class LocatorExpect(AssertionMixin):
 
         if matcher_fn is not None:
 
-            def _invoke_matcher(*args: Any, **kwargs: Any) -> None:
+            def _invoke_matcher(*args: Any, **kwargs: Any) -> LocatorExpect:
                 timeout = kwargs.pop("timeout", None)
                 polling = kwargs.pop("polling", None)
 
@@ -118,9 +185,11 @@ class LocatorExpect(AssertionMixin):
                     polling=polling,
                 )
 
+                return self
+
             return _invoke_matcher
 
-        def _invoke(*args: Any, **kwargs: Any) -> None:
+        def _invoke(*args: Any, **kwargs: Any) -> LocatorExpect:
             timeout = kwargs.pop("timeout", None)
             polling = kwargs.pop("polling", None)
 
@@ -140,8 +209,9 @@ class LocatorExpect(AssertionMixin):
                 try:
                     method(*args, timeout=0.001, **kwargs)
                     return (True, "passed")
-                except AssertionError:
-                    return (False, "failed")
+                except AssertionError as exc:
+                    first_line = str(exc).splitlines()[0] if str(exc) else "failed"
+                    return (False, first_line)
                 except StaleElementReferenceException:
                     return (False, "stale element")
 
@@ -153,5 +223,7 @@ class LocatorExpect(AssertionMixin):
                 timeout=timeout,
                 polling=polling,
             )
+
+            return self
 
         return _invoke

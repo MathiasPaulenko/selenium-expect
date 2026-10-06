@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import logging
 import time
-from collections.abc import Callable
+from collections.abc import Callable, Sequence
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -52,7 +52,7 @@ def retry_until(
     condition: Callable[[], tuple[bool, Any]],
     timeout: float,
     polling_interval: float = 0.5,
-    polling_intervals: list[float] | None = None,
+    polling_intervals: Sequence[float] | None = None,
     debug: bool = False,
 ) -> RetryResult:
     """Execute ``condition()`` repeatedly until it returns ``(True, value)`` or timeout.

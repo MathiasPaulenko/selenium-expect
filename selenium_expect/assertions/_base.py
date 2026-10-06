@@ -7,7 +7,7 @@ import re
 from collections.abc import Callable
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any
+from typing import Any, Self
 
 from selenium_expect._config import (
     ExpectConfig,
@@ -68,7 +68,7 @@ class AssertionMixin:
             effective_interval = 0.5
             effective_intervals = polling
         else:
-            effective_interval = polling
+            effective_interval = _normalize_timeout(polling)
             effective_intervals = None
         if effective_interval < 0:
             raise ValueError(f"polling interval must be >= 0, got {effective_interval}")
@@ -146,6 +146,14 @@ class AssertionMixin:
         parent = getattr(target, "parent", None)
         if parent is not None and hasattr(parent, "save_screenshot"):
             return parent
+        driver = getattr(target, "driver", None)
+        if driver is not None and hasattr(driver, "save_screenshot"):
+            return driver
+        if isinstance(target, (list, tuple)):
+            for el in target:
+                el_parent = getattr(el, "parent", None)
+                if el_parent is not None and hasattr(el_parent, "save_screenshot"):
+                    return el_parent
         return None
 
     def _take_screenshot_on_failure(self, condition_name: str) -> None:
@@ -174,7 +182,7 @@ class AssertionMixin:
     def to_satisfy_all(
         self,
         *conditions: Callable[[Any], None],
-    ) -> None:
+    ) -> Self:
         """Assert all conditions pass (AND). Each condition receives the target.
 
         Each condition is a callable responsible for its own retry/timeout.
@@ -185,7 +193,7 @@ class AssertionMixin:
             satisfy_all(self._target, *conditions, message=self._message)
         except AssertionError as exc:
             if self._negate:
-                return
+                return self
             self._raise_or_collect(exc)
         else:
             if self._negate:
@@ -203,11 +211,12 @@ class AssertionMixin:
                         )
                     )
                 )
+        return self
 
     def to_satisfy_any(
         self,
         *conditions: Callable[[Any], None],
-    ) -> None:
+    ) -> Self:
         """Assert at least one condition passes (OR).
 
         Each condition is a callable responsible for its own retry/timeout.
@@ -218,7 +227,7 @@ class AssertionMixin:
             satisfy_any(self._target, *conditions, message=self._message)
         except AssertionError as exc:
             if self._negate:
-                return
+                return self
             self._raise_or_collect(exc)
         else:
             if self._negate:
@@ -236,11 +245,12 @@ class AssertionMixin:
                         )
                     )
                 )
+        return self
 
     def to_satisfy_none(
         self,
         *conditions: Callable[[Any], None],
-    ) -> None:
+    ) -> Self:
         """Assert no condition passes (NOT).
 
         Each condition is a callable responsible for its own retry/timeout.
@@ -251,7 +261,7 @@ class AssertionMixin:
             satisfy_none(self._target, *conditions, message=self._message)
         except AssertionError as exc:
             if self._negate:
-                return
+                return self
             self._raise_or_collect(exc)
         else:
             if self._negate:
@@ -269,6 +279,7 @@ class AssertionMixin:
                         )
                     )
                 )
+        return self
 
     def _raise_or_collect(self, exc: AssertionError) -> None:
         """Raise *exc* or collect it in soft mode."""
@@ -291,7 +302,7 @@ class AssertionMixin:
         if matcher_fn is None:
             raise AttributeError(f"{type(self).__name__!r} object has no attribute {name!r}")
 
-        def _invoke(*args: Any, **kwargs: Any) -> None:
+        def _invoke(*args: Any, **kwargs: Any) -> AssertionMixin:
             target = self._target
             timeout = kwargs.pop("timeout", None)
             polling = kwargs.pop("polling", None)
@@ -301,11 +312,13 @@ class AssertionMixin:
 
             self._run_assertion(
                 condition=condition,
-                condition_name=name,
+                condition_name=name.replace("_", " "),
                 expected=None,
                 entity=None,
                 timeout=timeout,
                 polling=polling,
             )
+
+            return self
 
         return _invoke

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Self
 
 from selenium.webdriver.remote.webdriver import WebDriver
 
@@ -33,7 +33,7 @@ class ExpectWindow(AssertionMixin):
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert driver.get_window_position() == {'x': x, 'y': y}."""
         driver = self._target
 
@@ -51,6 +51,8 @@ class ExpectWindow(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_have_size(
         self,
         width: int,
@@ -58,7 +60,7 @@ class ExpectWindow(AssertionMixin):
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert driver.get_window_size() == {'width': width, 'height': height}."""
         driver = self._target
 
@@ -76,6 +78,8 @@ class ExpectWindow(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_have_rect(
         self,
         x: int,
@@ -85,7 +89,7 @@ class ExpectWindow(AssertionMixin):
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert driver.get_window_rect() matches all four values."""
         driver = self._target
 
@@ -108,6 +112,8 @@ class ExpectWindow(AssertionMixin):
             timeout=timeout,
             polling=polling,
         )
+
+        return self
 
     # --- Overrides ---
 

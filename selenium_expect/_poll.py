@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import re
 from collections.abc import Callable
-from typing import Any
+from typing import Any, Self
 
 from selenium_expect._config import (
     ExpectConfig,
@@ -46,7 +46,7 @@ class PollAssertion:
             self._polling_interval = 0.5
             self._polling_intervals = polling
         else:
-            self._polling_interval = polling
+            self._polling_interval = _normalize_timeout(polling)
             self._polling_intervals = None
         if self._polling_interval < 0:
             raise ValueError(f"polling interval must be >= 0, got {self._polling_interval}")
@@ -88,7 +88,7 @@ class PollAssertion:
         else:
             raise AssertionError(error_msg)
 
-    def to_equal(self, expected: Any) -> None:
+    def to_equal(self, expected: Any) -> Self:
         """Assert fn() == expected."""
         fn = self._fn
 
@@ -98,7 +98,9 @@ class PollAssertion:
 
         self._run(condition, f"to equal {expected!r}", expected)
 
-    def to_be_truthy(self) -> None:
+        return self
+
+    def to_be_truthy(self) -> Self:
         """Assert bool(fn()) is True."""
         fn = self._fn
 
@@ -108,7 +110,9 @@ class PollAssertion:
 
         self._run(condition, "to be truthy", True)
 
-    def to_be_falsy(self) -> None:
+        return self
+
+    def to_be_falsy(self) -> Self:
         """Assert bool(fn()) is False."""
         fn = self._fn
 
@@ -118,7 +122,9 @@ class PollAssertion:
 
         self._run(condition, "to be falsy", False)
 
-    def to_be_none(self) -> None:
+        return self
+
+    def to_be_none(self) -> Self:
         """Assert fn() is None."""
         fn = self._fn
 
@@ -128,7 +134,9 @@ class PollAssertion:
 
         self._run(condition, "to be None", None)
 
-    def to_contain(self, expected: Any) -> None:
+        return self
+
+    def to_contain(self, expected: Any) -> Self:
         """Assert expected in fn()."""
         fn = self._fn
 
@@ -143,7 +151,9 @@ class PollAssertion:
 
         self._run(condition, f"to contain {expected!r}", expected)
 
-    def to_match(self, pattern: str) -> None:
+        return self
+
+    def to_match(self, pattern: str) -> Self:
         """Assert re.search(pattern, str(fn()))."""
         fn = self._fn
 
@@ -153,7 +163,9 @@ class PollAssertion:
 
         self._run(condition, f"to match {pattern!r}", pattern)
 
-    def to_be_greater_than(self, expected: Any) -> None:
+        return self
+
+    def to_be_greater_than(self, expected: Any) -> Self:
         """Assert fn() > expected."""
         fn = self._fn
 
@@ -166,7 +178,9 @@ class PollAssertion:
 
         self._run(condition, f"to be greater than {expected}", expected)
 
-    def to_be_less_than(self, expected: Any) -> None:
+        return self
+
+    def to_be_less_than(self, expected: Any) -> Self:
         """Assert fn() < expected."""
         fn = self._fn
 
@@ -179,7 +193,9 @@ class PollAssertion:
 
         self._run(condition, f"to be less than {expected}", expected)
 
-    def to_be_in_list(self, expected: list[Any]) -> None:
+        return self
+
+    def to_be_in_list(self, expected: list[Any]) -> Self:
         """Assert fn() in expected."""
         fn = self._fn
 
@@ -189,7 +205,9 @@ class PollAssertion:
 
         self._run(condition, f"to be in {expected!r}", expected)
 
-    def to_have_length(self, expected: int) -> None:
+        return self
+
+    def to_have_length(self, expected: int) -> Self:
         """Assert len(fn()) == expected."""
         fn = self._fn
 
@@ -202,6 +220,8 @@ class PollAssertion:
             return (actual_len == expected, actual_len)
 
         self._run(condition, f"to have length {expected}", expected)
+
+        return self
 
 
 def poll(

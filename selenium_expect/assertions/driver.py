@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import re
-from typing import Any
+from typing import Any, Self
 
 from selenium.webdriver.remote.webdriver import WebDriver
 
@@ -41,7 +41,7 @@ class ExpectDriver(ExpectCookie, ExpectJS, ExpectIframe, ExpectWindow, Assertion
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert driver.title == title."""
         driver = self._target
 
@@ -58,13 +58,15 @@ class ExpectDriver(ExpectCookie, ExpectJS, ExpectIframe, ExpectWindow, Assertion
             polling=polling,
         )
 
+        return self
+
     def to_have_title_contains(
         self,
         title: str,
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert title in driver.title."""
         driver = self._target
 
@@ -81,13 +83,15 @@ class ExpectDriver(ExpectCookie, ExpectJS, ExpectIframe, ExpectWindow, Assertion
             polling=polling,
         )
 
+        return self
+
     def to_have_title_matches(
         self,
         pattern: str,
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert re.search(pattern, driver.title)."""
         driver = self._target
 
@@ -104,6 +108,8 @@ class ExpectDriver(ExpectCookie, ExpectJS, ExpectIframe, ExpectWindow, Assertion
             polling=polling,
         )
 
+        return self
+
     # --- URL ---
 
     def to_have_url(
@@ -112,7 +118,7 @@ class ExpectDriver(ExpectCookie, ExpectJS, ExpectIframe, ExpectWindow, Assertion
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert driver.current_url == url."""
         driver = self._target
 
@@ -129,13 +135,15 @@ class ExpectDriver(ExpectCookie, ExpectJS, ExpectIframe, ExpectWindow, Assertion
             polling=polling,
         )
 
+        return self
+
     def to_have_url_contains(
         self,
         url: str,
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert url in driver.current_url."""
         driver = self._target
 
@@ -152,13 +160,15 @@ class ExpectDriver(ExpectCookie, ExpectJS, ExpectIframe, ExpectWindow, Assertion
             polling=polling,
         )
 
+        return self
+
     def to_have_url_matches(
         self,
         pattern: str,
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert re.search(pattern, driver.current_url)."""
         driver = self._target
 
@@ -175,13 +185,15 @@ class ExpectDriver(ExpectCookie, ExpectJS, ExpectIframe, ExpectWindow, Assertion
             polling=polling,
         )
 
+        return self
+
     def to_have_url_changes(
         self,
         url: str,
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert driver.current_url != url (URL has changed from the given value)."""
         driver = self._target
 
@@ -198,6 +210,8 @@ class ExpectDriver(ExpectCookie, ExpectJS, ExpectIframe, ExpectWindow, Assertion
             polling=polling,
         )
 
+        return self
+
     # --- Ready state ---
 
     def to_have_ready_state(
@@ -206,7 +220,7 @@ class ExpectDriver(ExpectCookie, ExpectJS, ExpectIframe, ExpectWindow, Assertion
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert document.readyState == state (e.g. 'complete', 'interactive', 'loading')."""
         driver = self._target
 
@@ -223,6 +237,8 @@ class ExpectDriver(ExpectCookie, ExpectJS, ExpectIframe, ExpectWindow, Assertion
             polling=polling,
         )
 
+        return self
+
     # --- Windows / tabs ---
 
     def to_have_window_count(
@@ -231,7 +247,7 @@ class ExpectDriver(ExpectCookie, ExpectJS, ExpectIframe, ExpectWindow, Assertion
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert len(driver.window_handles) == count."""
         driver = self._target
 
@@ -248,13 +264,15 @@ class ExpectDriver(ExpectCookie, ExpectJS, ExpectIframe, ExpectWindow, Assertion
             polling=polling,
         )
 
+        return self
+
     def to_have_window_count_greater_than(
         self,
         n: int,
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert len(driver.window_handles) > n."""
         driver = self._target
 
@@ -271,13 +289,15 @@ class ExpectDriver(ExpectCookie, ExpectJS, ExpectIframe, ExpectWindow, Assertion
             polling=polling,
         )
 
+        return self
+
     def to_have_window_count_less_than(
         self,
         n: int,
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert len(driver.window_handles) < n."""
         driver = self._target
 
@@ -294,13 +314,15 @@ class ExpectDriver(ExpectCookie, ExpectJS, ExpectIframe, ExpectWindow, Assertion
             polling=polling,
         )
 
+        return self
+
     def to_have_window_handle(
         self,
         handle: str,
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert driver.current_window_handle == handle."""
         driver = self._target
 
@@ -317,13 +339,15 @@ class ExpectDriver(ExpectCookie, ExpectJS, ExpectIframe, ExpectWindow, Assertion
             polling=polling,
         )
 
+        return self
+
     def to_have_new_window_opened(
         self,
         previous_handles: list[str],
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert that a new window has opened (current handles > previous handles)."""
         driver = self._target
 
@@ -341,6 +365,8 @@ class ExpectDriver(ExpectCookie, ExpectJS, ExpectIframe, ExpectWindow, Assertion
             polling=polling,
         )
 
+        return self
+
     # --- Browser / capabilities ---
 
     def to_have_browser_name(
@@ -349,7 +375,7 @@ class ExpectDriver(ExpectCookie, ExpectJS, ExpectIframe, ExpectWindow, Assertion
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert driver.name == name."""
         driver = self._target
 
@@ -366,13 +392,15 @@ class ExpectDriver(ExpectCookie, ExpectJS, ExpectIframe, ExpectWindow, Assertion
             polling=polling,
         )
 
+        return self
+
     def to_have_orientation(
         self,
         orientation: str,
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert driver.orientation == orientation."""
         driver = self._target
 
@@ -389,6 +417,8 @@ class ExpectDriver(ExpectCookie, ExpectJS, ExpectIframe, ExpectWindow, Assertion
             polling=polling,
         )
 
+        return self
+
     def to_have_capability(
         self,
         key: str,
@@ -396,7 +426,7 @@ class ExpectDriver(ExpectCookie, ExpectJS, ExpectIframe, ExpectWindow, Assertion
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert driver.capabilities[key] == value."""
         driver = self._target
 
@@ -414,6 +444,8 @@ class ExpectDriver(ExpectCookie, ExpectJS, ExpectIframe, ExpectWindow, Assertion
             polling=polling,
         )
 
+        return self
+
     def to_have_capability_contains(
         self,
         key: str,
@@ -421,7 +453,7 @@ class ExpectDriver(ExpectCookie, ExpectJS, ExpectIframe, ExpectWindow, Assertion
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert value in driver.capabilities[key]."""
         driver = self._target
 
@@ -441,6 +473,8 @@ class ExpectDriver(ExpectCookie, ExpectJS, ExpectIframe, ExpectWindow, Assertion
             polling=polling,
         )
 
+        return self
+
     # --- Page source ---
 
     def to_have_page_source_contains(
@@ -449,7 +483,7 @@ class ExpectDriver(ExpectCookie, ExpectJS, ExpectIframe, ExpectWindow, Assertion
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert text in driver.page_source."""
         driver = self._target
 
@@ -466,13 +500,15 @@ class ExpectDriver(ExpectCookie, ExpectJS, ExpectIframe, ExpectWindow, Assertion
             polling=polling,
         )
 
+        return self
+
     def to_have_page_source_matches(
         self,
         pattern: str,
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert re.search(pattern, driver.page_source)."""
         driver = self._target
 
@@ -489,13 +525,15 @@ class ExpectDriver(ExpectCookie, ExpectJS, ExpectIframe, ExpectWindow, Assertion
             polling=polling,
         )
 
+        return self
+
     def to_have_page_source_not_contains(
         self,
         text: str,
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert text not in driver.page_source."""
         driver = self._target
 
@@ -512,6 +550,8 @@ class ExpectDriver(ExpectCookie, ExpectJS, ExpectIframe, ExpectWindow, Assertion
             polling=polling,
         )
 
+        return self
+
     # --- Window position / size / rect ---
 
     def to_have_window_position(
@@ -521,7 +561,7 @@ class ExpectDriver(ExpectCookie, ExpectJS, ExpectIframe, ExpectWindow, Assertion
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert driver.get_window_position() == {'x': x, 'y': y}."""
         driver = self._target
 
@@ -539,6 +579,8 @@ class ExpectDriver(ExpectCookie, ExpectJS, ExpectIframe, ExpectWindow, Assertion
             polling=polling,
         )
 
+        return self
+
     def to_have_window_size(
         self,
         width: int,
@@ -546,7 +588,7 @@ class ExpectDriver(ExpectCookie, ExpectJS, ExpectIframe, ExpectWindow, Assertion
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert driver.get_window_size() == {'width': width, 'height': height}."""
         driver = self._target
 
@@ -564,6 +606,8 @@ class ExpectDriver(ExpectCookie, ExpectJS, ExpectIframe, ExpectWindow, Assertion
             polling=polling,
         )
 
+        return self
+
     def to_have_window_rect(
         self,
         x: int,
@@ -573,7 +617,7 @@ class ExpectDriver(ExpectCookie, ExpectJS, ExpectIframe, ExpectWindow, Assertion
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert driver.get_window_rect() matches all four values."""
         driver = self._target
 
@@ -597,6 +641,8 @@ class ExpectDriver(ExpectCookie, ExpectJS, ExpectIframe, ExpectWindow, Assertion
             polling=polling,
         )
 
+        return self
+
     # --- Active element ---
 
     def to_have_active_element_tag(
@@ -605,7 +651,7 @@ class ExpectDriver(ExpectCookie, ExpectJS, ExpectIframe, ExpectWindow, Assertion
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert driver.switch_to.active_element.tag_name == tag."""
         driver = self._target
 
@@ -622,13 +668,15 @@ class ExpectDriver(ExpectCookie, ExpectJS, ExpectIframe, ExpectWindow, Assertion
             polling=polling,
         )
 
+        return self
+
     def to_have_active_element_id(
         self,
         id: str,
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert driver.switch_to.active_element.get_attribute('id') == id."""
         driver = self._target
 
@@ -645,13 +693,15 @@ class ExpectDriver(ExpectCookie, ExpectJS, ExpectIframe, ExpectWindow, Assertion
             polling=polling,
         )
 
+        return self
+
     def to_have_active_element_class(
         self,
         class_name: str,
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert class_name in active_element.get_attribute('class')."""
         driver = self._target
 
@@ -668,6 +718,8 @@ class ExpectDriver(ExpectCookie, ExpectJS, ExpectIframe, ExpectWindow, Assertion
             timeout=timeout,
             polling=polling,
         )
+
+        return self
 
     # --- Overrides ---
 

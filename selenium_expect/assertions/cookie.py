@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Self
 
 from selenium.webdriver.remote.webdriver import WebDriver
 
@@ -36,7 +36,7 @@ class ExpectCookie(AssertionMixin):
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert driver.get_cookie(name) is not None."""
         driver = self._target
 
@@ -53,6 +53,8 @@ class ExpectCookie(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_have_cookie_value(
         self,
         name: str,
@@ -60,7 +62,7 @@ class ExpectCookie(AssertionMixin):
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert driver.get_cookie(name)['value'] == value."""
         driver = self._target
 
@@ -78,6 +80,8 @@ class ExpectCookie(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_have_cookie_value_contains(
         self,
         name: str,
@@ -85,7 +89,7 @@ class ExpectCookie(AssertionMixin):
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert value in driver.get_cookie(name)['value']."""
         driver = self._target
 
@@ -103,6 +107,8 @@ class ExpectCookie(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_have_cookie_domain(
         self,
         name: str,
@@ -110,7 +116,7 @@ class ExpectCookie(AssertionMixin):
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert driver.get_cookie(name)['domain'] == domain."""
         driver = self._target
 
@@ -128,6 +134,8 @@ class ExpectCookie(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_have_cookie_path(
         self,
         name: str,
@@ -135,7 +143,7 @@ class ExpectCookie(AssertionMixin):
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert driver.get_cookie(name)['path'] == path."""
         driver = self._target
 
@@ -153,13 +161,15 @@ class ExpectCookie(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_have_cookie_http_only(
         self,
         name: str,
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert driver.get_cookie(name)['httpOnly'] == True."""
         driver = self._target
 
@@ -177,13 +187,15 @@ class ExpectCookie(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_have_cookie_secure(
         self,
         name: str,
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert driver.get_cookie(name)['secure'] == True."""
         driver = self._target
 
@@ -201,6 +213,8 @@ class ExpectCookie(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_have_cookie_same_site(
         self,
         name: str,
@@ -208,7 +222,7 @@ class ExpectCookie(AssertionMixin):
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert driver.get_cookie(name)['sameSite'] == same_site."""
         driver = self._target
 
@@ -226,13 +240,15 @@ class ExpectCookie(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_have_cookie_count(
         self,
         count: int,
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert len(driver.get_cookies()) == count."""
         driver = self._target
 
@@ -249,13 +265,15 @@ class ExpectCookie(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_have_cookie_count_greater_than(
         self,
         n: int,
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert len(driver.get_cookies()) > n."""
         driver = self._target
 
@@ -272,6 +290,8 @@ class ExpectCookie(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_have_cookie_expiry(
         self,
         name: str,
@@ -279,7 +299,7 @@ class ExpectCookie(AssertionMixin):
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert driver.get_cookie(name)['expiry'] == expiry."""
         driver = self._target
 
@@ -299,12 +319,14 @@ class ExpectCookie(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_have_no_cookies(
         self,
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert len(driver.get_cookies()) == 0."""
         driver = self._target
 
@@ -320,6 +342,8 @@ class ExpectCookie(AssertionMixin):
             timeout=timeout,
             polling=polling,
         )
+
+        return self
 
     # --- Overrides ---
 

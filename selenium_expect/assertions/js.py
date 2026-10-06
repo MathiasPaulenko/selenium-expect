@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import re
-from typing import Any
+from typing import Any, Self
 
 from selenium.webdriver.remote.webdriver import WebDriver
 
@@ -36,7 +36,7 @@ class ExpectJS(AssertionMixin):
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert driver.execute_script(script) == expected."""
         driver = self._target
 
@@ -53,6 +53,8 @@ class ExpectJS(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_have_js_result_contains(
         self,
         script: str,
@@ -60,7 +62,7 @@ class ExpectJS(AssertionMixin):
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert expected in driver.execute_script(script)."""
         driver = self._target
 
@@ -82,6 +84,8 @@ class ExpectJS(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_have_js_result_matches(
         self,
         script: str,
@@ -89,7 +93,7 @@ class ExpectJS(AssertionMixin):
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert re.search(pattern, str(driver.execute_script(script)))."""
         driver = self._target
 
@@ -106,6 +110,8 @@ class ExpectJS(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_have_async_js_result(
         self,
         script: str,
@@ -113,7 +119,7 @@ class ExpectJS(AssertionMixin):
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert driver.execute_async_script(script) == expected."""
         driver = self._target
 
@@ -130,6 +136,8 @@ class ExpectJS(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     # --- localStorage ---
 
     def to_have_local_storage_item(
@@ -139,7 +147,7 @@ class ExpectJS(AssertionMixin):
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert localStorage.getItem(key) == value via execute_script."""
         driver = self._target
 
@@ -156,13 +164,15 @@ class ExpectJS(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_have_local_storage_item_present(
         self,
         key: str,
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert localStorage.getItem(key) is not None."""
         driver = self._target
 
@@ -179,13 +189,15 @@ class ExpectJS(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_have_local_storage_item_absent(
         self,
         key: str,
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert localStorage.getItem(key) is None."""
         driver = self._target
 
@@ -202,13 +214,15 @@ class ExpectJS(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_have_local_storage_length(
         self,
         length: int,
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert localStorage.length == length."""
         driver = self._target
 
@@ -225,6 +239,8 @@ class ExpectJS(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     # --- sessionStorage ---
 
     def to_have_session_storage_item(
@@ -234,7 +250,7 @@ class ExpectJS(AssertionMixin):
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert sessionStorage.getItem(key) == value."""
         driver = self._target
 
@@ -251,13 +267,15 @@ class ExpectJS(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_have_session_storage_item_present(
         self,
         key: str,
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert sessionStorage.getItem(key) is not None."""
         driver = self._target
 
@@ -274,13 +292,15 @@ class ExpectJS(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_have_session_storage_item_absent(
         self,
         key: str,
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert sessionStorage.getItem(key) is None."""
         driver = self._target
 
@@ -297,13 +317,15 @@ class ExpectJS(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_have_session_storage_length(
         self,
         length: int,
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert sessionStorage.length == length."""
         driver = self._target
 
@@ -320,6 +342,8 @@ class ExpectJS(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_have_js_variable(
         self,
         name: str,
@@ -327,7 +351,7 @@ class ExpectJS(AssertionMixin):
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert driver.execute_script('return window[name]') == value."""
         driver = self._target
 
@@ -343,6 +367,8 @@ class ExpectJS(AssertionMixin):
             timeout=timeout,
             polling=polling,
         )
+
+        return self
 
     # --- Overrides ---
 

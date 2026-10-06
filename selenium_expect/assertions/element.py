@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import re
-from typing import Any
+from typing import Any, Self
 
 from selenium.webdriver.remote.webelement import WebElement
 
@@ -31,12 +31,13 @@ class ExpectElement(AssertionMixin):
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert element.is_displayed() == True."""
         el = self._target
 
         def condition() -> tuple[bool, Any]:
-            return (el.is_displayed(), el.is_displayed())
+            displayed = el.is_displayed()
+            return (displayed, displayed)
 
         self._run_assertion(
             condition=condition,
@@ -47,12 +48,14 @@ class ExpectElement(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_be_hidden(
         self,
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert element.is_displayed() == False."""
         el = self._target
 
@@ -69,17 +72,20 @@ class ExpectElement(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_be_enabled(
         self,
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert element.is_enabled() == True."""
         el = self._target
 
         def condition() -> tuple[bool, Any]:
-            return (el.is_enabled(), el.is_enabled())
+            enabled = el.is_enabled()
+            return (enabled, enabled)
 
         self._run_assertion(
             condition=condition,
@@ -90,12 +96,14 @@ class ExpectElement(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_be_disabled(
         self,
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert element.is_enabled() == False."""
         el = self._target
 
@@ -112,17 +120,20 @@ class ExpectElement(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_be_checked(
         self,
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert element.is_selected() == True (checkbox/radio)."""
         el = self._target
 
         def condition() -> tuple[bool, Any]:
-            return (el.is_selected(), el.is_selected())
+            selected = el.is_selected()
+            return (selected, selected)
 
         self._run_assertion(
             condition=condition,
@@ -133,17 +144,20 @@ class ExpectElement(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_be_selected(
         self,
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert element.is_selected() == True (option/checkbox/radio)."""
         el = self._target
 
         def condition() -> tuple[bool, Any]:
-            return (el.is_selected(), el.is_selected())
+            selected = el.is_selected()
+            return (selected, selected)
 
         self._run_assertion(
             condition=condition,
@@ -154,12 +168,14 @@ class ExpectElement(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_be_present(
         self,
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert element exists in DOM (element.tag_name doesn't raise)."""
         el = self._target
 
@@ -179,12 +195,14 @@ class ExpectElement(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_be_absent(
         self,
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert element doesn't exist (raises StaleElementReferenceException
         or NoSuchElementException)."""
         el = self._target
@@ -205,12 +223,14 @@ class ExpectElement(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_be_clickable(
         self,
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert element.is_displayed() and element.is_enabled()."""
         el = self._target
 
@@ -229,12 +249,14 @@ class ExpectElement(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_be_stale(
         self,
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert element is stale (any access raises StaleElementReferenceException)."""
         el = self._target
 
@@ -254,12 +276,14 @@ class ExpectElement(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_be_unselected(
         self,
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert element.is_selected() == False (semantic alias for not_.to_be_selected())."""
         el = self._target
 
@@ -276,12 +300,14 @@ class ExpectElement(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_be_unchecked(
         self,
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert element.is_selected() == False (semantic alias for not_.to_be_checked())."""
         el = self._target
 
@@ -298,12 +324,14 @@ class ExpectElement(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_be_focused(
         self,
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert element is the active element (driver.switch_to.active_element == element)."""
         el = self._target
 
@@ -323,12 +351,14 @@ class ExpectElement(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_be_editable(
         self,
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert element is editable (input/textarea, not readonly, not disabled)."""
         el = self._target
 
@@ -352,12 +382,14 @@ class ExpectElement(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_be_readonly(
         self,
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert element is readonly (get_attribute('readonly') is not None)."""
         el = self._target
 
@@ -374,12 +406,14 @@ class ExpectElement(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_be_empty(
         self,
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert element.text.strip() == '' (no visible text)."""
         el = self._target
 
@@ -396,6 +430,8 @@ class ExpectElement(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     # --- Text ---
 
     def to_have_text(
@@ -404,7 +440,7 @@ class ExpectElement(AssertionMixin):
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert element.text == text."""
         el = self._target
 
@@ -421,13 +457,15 @@ class ExpectElement(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_have_text_contains(
         self,
         text: str,
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert text in element.text."""
         el = self._target
 
@@ -444,13 +482,15 @@ class ExpectElement(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_have_text_matches(
         self,
         pattern: str,
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert re.search(pattern, element.text)."""
         el = self._target
 
@@ -467,12 +507,14 @@ class ExpectElement(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_have_text_empty(
         self,
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert element.text == ''."""
         el = self._target
 
@@ -489,12 +531,14 @@ class ExpectElement(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_have_text_not_empty(
         self,
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert element.text != ''."""
         el = self._target
 
@@ -511,13 +555,15 @@ class ExpectElement(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_have_text_starting_with(
         self,
         prefix: str,
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert element.text.startswith(prefix)."""
         el = self._target
 
@@ -534,13 +580,15 @@ class ExpectElement(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_have_text_ending_with(
         self,
         suffix: str,
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert element.text.endswith(suffix)."""
         el = self._target
 
@@ -557,12 +605,14 @@ class ExpectElement(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_have_text_in_list(
         self,
         *texts: str,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert element.text is one of *texts."""
         if not texts:
             raise ValueError("At least one text must be provided")
@@ -581,13 +631,15 @@ class ExpectElement(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_have_value(
         self,
         value: str,
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert element.get_attribute('value') == value."""
         el = self._target
 
@@ -604,13 +656,15 @@ class ExpectElement(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_have_value_contains(
         self,
         value: str,
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert value in element.get_attribute('value')."""
         el = self._target
 
@@ -627,13 +681,15 @@ class ExpectElement(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_have_value_matches(
         self,
         pattern: str,
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert re.search(pattern, element.get_attribute('value'))."""
         el = self._target
 
@@ -650,13 +706,15 @@ class ExpectElement(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_have_value_in_list(
         self,
         values: list[str],
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert element.get_attribute('value') in values."""
         if not values:
             raise ValueError("values list must not be empty")
@@ -675,6 +733,8 @@ class ExpectElement(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     # --- Attributes ---
 
     def to_have_attribute(
@@ -684,7 +744,7 @@ class ExpectElement(AssertionMixin):
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert element.get_attribute(name) == value."""
         el = self._target
 
@@ -701,6 +761,8 @@ class ExpectElement(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_have_attribute_contains(
         self,
         name: str,
@@ -708,7 +770,7 @@ class ExpectElement(AssertionMixin):
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert value in element.get_attribute(name)."""
         el = self._target
 
@@ -725,6 +787,8 @@ class ExpectElement(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_have_attribute_matches(
         self,
         name: str,
@@ -732,7 +796,7 @@ class ExpectElement(AssertionMixin):
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert re.search(pattern, element.get_attribute(name))."""
         el = self._target
 
@@ -749,13 +813,15 @@ class ExpectElement(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_have_attribute_empty(
         self,
         name: str,
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert element.get_attribute(name) == '' or None."""
         el = self._target
 
@@ -772,13 +838,15 @@ class ExpectElement(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_have_attribute_present(
         self,
         name: str,
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert element.get_attribute(name) is not None."""
         el = self._target
 
@@ -795,13 +863,15 @@ class ExpectElement(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_have_attribute_absent(
         self,
         name: str,
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert element.get_attribute(name) is None."""
         el = self._target
 
@@ -818,6 +888,8 @@ class ExpectElement(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_have_attribute_in_list(
         self,
         name: str,
@@ -825,7 +897,7 @@ class ExpectElement(AssertionMixin):
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert element.get_attribute(name) in values."""
         if not values:
             raise ValueError("values list must not be empty")
@@ -844,6 +916,8 @@ class ExpectElement(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_have_dom_attribute(
         self,
         name: str,
@@ -851,7 +925,7 @@ class ExpectElement(AssertionMixin):
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert element.get_dom_attribute(name) == value."""
         el = self._target
 
@@ -868,6 +942,8 @@ class ExpectElement(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_have_dom_attribute_contains(
         self,
         name: str,
@@ -875,7 +951,7 @@ class ExpectElement(AssertionMixin):
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert value in element.get_dom_attribute(name)."""
         el = self._target
 
@@ -892,6 +968,8 @@ class ExpectElement(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_have_property(
         self,
         name: str,
@@ -899,7 +977,7 @@ class ExpectElement(AssertionMixin):
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert element.get_property(name) == value."""
         el = self._target
 
@@ -916,6 +994,8 @@ class ExpectElement(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_have_property_contains(
         self,
         name: str,
@@ -923,7 +1003,7 @@ class ExpectElement(AssertionMixin):
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert value in str(element.get_property(name))."""
         el = self._target
 
@@ -942,6 +1022,8 @@ class ExpectElement(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     # --- CSS properties ---
 
     def to_have_css_property(
@@ -951,7 +1033,7 @@ class ExpectElement(AssertionMixin):
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert element.value_of_css_property(name) == value."""
         el = self._target
 
@@ -968,6 +1050,8 @@ class ExpectElement(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_have_css_property_contains(
         self,
         name: str,
@@ -975,7 +1059,7 @@ class ExpectElement(AssertionMixin):
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert value in element.value_of_css_property(name)."""
         el = self._target
 
@@ -992,6 +1076,8 @@ class ExpectElement(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_have_css_property_matches(
         self,
         name: str,
@@ -999,7 +1085,7 @@ class ExpectElement(AssertionMixin):
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert re.search(pattern, element.value_of_css_property(name))."""
         el = self._target
 
@@ -1016,6 +1102,8 @@ class ExpectElement(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     # --- Identity / DOM ---
 
     def to_have_tag(
@@ -1024,7 +1112,7 @@ class ExpectElement(AssertionMixin):
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert element.tag_name == tag."""
         el = self._target
 
@@ -1041,13 +1129,15 @@ class ExpectElement(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_have_id(
         self,
         id: str,
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert element.get_attribute('id') == id."""
         el = self._target
 
@@ -1064,13 +1154,15 @@ class ExpectElement(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_have_class(
         self,
         class_name: str,
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert class_name in element.get_attribute('class').split()."""
         el = self._target
 
@@ -1088,13 +1180,15 @@ class ExpectElement(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_have_class_contains(
         self,
         class_name: str,
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert class_name in element.get_attribute('class') (substring)."""
         el = self._target
 
@@ -1111,13 +1205,15 @@ class ExpectElement(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_contain_class(
         self,
         class_name: str,
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert class_name in element.get_attribute('class').split() (alias of to_have_class)."""
         el = self._target
 
@@ -1135,13 +1231,15 @@ class ExpectElement(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_have_class_matching(
         self,
         pattern: str,
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert any class in element.get_attribute('class').split() matches pattern."""
         el = self._target
 
@@ -1159,12 +1257,14 @@ class ExpectElement(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_have_all_classes(
         self,
         *classes: str,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert element has all specified classes."""
         if not classes:
             raise ValueError("At least one class must be provided")
@@ -1184,12 +1284,14 @@ class ExpectElement(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_have_class_in_list(
         self,
         *classes: str,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert element has at least one of the specified classes."""
         if not classes:
             raise ValueError("At least one class must be provided")
@@ -1209,6 +1311,8 @@ class ExpectElement(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     # --- Position / dimensions ---
 
     def to_have_location(
@@ -1218,7 +1322,7 @@ class ExpectElement(AssertionMixin):
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert element.location == {'x': x, 'y': y}."""
         el = self._target
 
@@ -1236,13 +1340,15 @@ class ExpectElement(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_have_location_x(
         self,
         x: int,
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert element.location['x'] == x."""
         el = self._target
 
@@ -1259,13 +1365,15 @@ class ExpectElement(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_have_location_y(
         self,
         y: int,
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert element.location['y'] == y."""
         el = self._target
 
@@ -1282,6 +1390,8 @@ class ExpectElement(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_have_size(
         self,
         width: int,
@@ -1289,7 +1399,7 @@ class ExpectElement(AssertionMixin):
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert element.size == {'width': width, 'height': height}."""
         el = self._target
 
@@ -1307,13 +1417,15 @@ class ExpectElement(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_have_size_width(
         self,
         width: int,
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert element.size['width'] == width."""
         el = self._target
 
@@ -1330,13 +1442,15 @@ class ExpectElement(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_have_size_height(
         self,
         height: int,
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert element.size['height'] == height."""
         el = self._target
 
@@ -1353,6 +1467,8 @@ class ExpectElement(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_have_rect(
         self,
         x: int,
@@ -1362,7 +1478,7 @@ class ExpectElement(AssertionMixin):
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert element.rect matches all four values."""
         el = self._target
 
@@ -1386,6 +1502,8 @@ class ExpectElement(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_have_location_greater_than(
         self,
         x: int | None = None,
@@ -1393,7 +1511,7 @@ class ExpectElement(AssertionMixin):
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert element.location x and/or y are greater than given values."""
         if x is None and y is None:
             raise ValueError("At least one of x or y must be provided")
@@ -1418,6 +1536,8 @@ class ExpectElement(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_have_location_less_than(
         self,
         x: int | None = None,
@@ -1425,7 +1545,7 @@ class ExpectElement(AssertionMixin):
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert element.location x and/or y are less than given values."""
         if x is None and y is None:
             raise ValueError("At least one of x or y must be provided")
@@ -1450,6 +1570,8 @@ class ExpectElement(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_have_size_greater_than(
         self,
         width: int | None = None,
@@ -1457,7 +1579,7 @@ class ExpectElement(AssertionMixin):
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert element.size width and/or height are greater than given values."""
         if width is None and height is None:
             raise ValueError("At least one of width or height must be provided")
@@ -1482,6 +1604,8 @@ class ExpectElement(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_have_size_less_than(
         self,
         width: int | None = None,
@@ -1489,7 +1613,7 @@ class ExpectElement(AssertionMixin):
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert element.size width and/or height are less than given values."""
         if width is None and height is None:
             raise ValueError("At least one of width or height must be provided")
@@ -1514,6 +1638,8 @@ class ExpectElement(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_have_location_once_scrolled_into_view(
         self,
         x: int,
@@ -1521,7 +1647,7 @@ class ExpectElement(AssertionMixin):
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert element.location_once_scrolled_into_view == {'x': x, 'y': y}."""
         el = self._target
 
@@ -1539,6 +1665,8 @@ class ExpectElement(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     # --- Accessibility (Selenium 4+) ---
 
     def to_have_aria_role(
@@ -1547,7 +1675,7 @@ class ExpectElement(AssertionMixin):
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert element.aria_role == role."""
         el = self._target
 
@@ -1564,13 +1692,15 @@ class ExpectElement(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_have_aria_role_contains(
         self,
         role: str,
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert role in element.aria_role."""
         el = self._target
 
@@ -1587,12 +1717,14 @@ class ExpectElement(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_have_aria_role_in_list(
         self,
         *roles: str,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert element.aria_role is one of *roles."""
         if not roles:
             raise ValueError("At least one role must be provided")
@@ -1611,13 +1743,15 @@ class ExpectElement(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_have_accessible_name(
         self,
         name: str,
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert element.accessible_name == name."""
         el = self._target
 
@@ -1634,13 +1768,15 @@ class ExpectElement(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_have_accessible_name_contains(
         self,
         name: str,
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert name in element.accessible_name."""
         el = self._target
 
@@ -1657,7 +1793,9 @@ class ExpectElement(AssertionMixin):
             polling=polling,
         )
 
-    # --- Shadow DOM ---
+        return self
+
+    # --- JavaScript property ---
 
     def to_have_js_property(
         self,
@@ -1666,7 +1804,7 @@ class ExpectElement(AssertionMixin):
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert element JS property == value via execute_script."""
         el = self._target
 
@@ -1686,12 +1824,16 @@ class ExpectElement(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
+    # --- Shadow DOM ---
+
     def to_have_shadow_root(
         self,
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert element.shadow_root is not None."""
         el = self._target
 
@@ -1708,12 +1850,14 @@ class ExpectElement(AssertionMixin):
             polling=polling,
         )
 
+        return self
+
     def to_have_shadow_root_absent(
         self,
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Assert element.shadow_root is None."""
         el = self._target
 
@@ -1729,6 +1873,8 @@ class ExpectElement(AssertionMixin):
             timeout=timeout,
             polling=polling,
         )
+
+        return self
 
     # --- Overrides ---
 
