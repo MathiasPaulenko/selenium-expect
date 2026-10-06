@@ -37,12 +37,12 @@ Changelog = "https://github.com/MathiasPaulenko/selenium-expect/blob/main/CHANGE
 
 [project.optional-dependencies]
 dev = [
-    "pytest>=8.0",
-    "pytest-cov>=5.0",
-    "ruff>=0.6",
-    "mypy>=1.11",
-    "build>=1.0",
-    "pre-commit>=3.0",
+    "pytest>=9.1.1",
+    "pytest-cov>=7.1.0",
+    "ruff>=0.16.5",
+    "mypy>=2.3.1",
+    "build>=1.6.0",
+    "pre-commit>=4.6.2",
 ]
 docs = [
     "mkdocs>=1.6",
