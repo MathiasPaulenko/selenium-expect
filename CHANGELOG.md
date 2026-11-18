@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.1] - 2026-11-18
+
+### Added
+
+- `expect.poll()` and `PollAssertion` accept `soft=True` for soft assertions
+- `expect.configure(soft=True)` now applies to `.poll()` calls too
+
+### Changed
+
+- `SoftAssertionCollector` keeps failures in an immutable tuple per context, so async tasks that inherit a parent's context get a snapshot instead of sharing the live list
+- `expect()` validates the `locator`/`by`/`value` arguments early (rejects strings, wrong arity, non-`str` parts)
+- Assertion error messages show the real backoff schedule instead of a fixed "0.5s interval" when `polling=[...]` is used
+- `extend()` no longer crashes on callables without `__dict__` (e.g. builtins)
+
+### Fixed
+
+- `to_be_absent()` and `to_be_stale()` no longer pass on unexpected driver errors (e.g. a crashed session); only a stale reference counts
+- `to_have_frame_text()` no longer pops the caller's frame context when the frame is not available
+- Screenshot capture failures (e.g. unwritable path) no longer mask the real `AssertionError`
+
 ## [1.1.0] - 2026-10-07
 
 ### Added
