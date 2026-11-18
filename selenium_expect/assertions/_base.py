@@ -103,6 +103,11 @@ class AssertionMixin:
             elapsed_ms=result.elapsed_ms,
             poll_count=result.poll_count,
             polling_interval=effective_interval,
+            polling_description=(
+                f"backoff schedule {list(effective_intervals)}"
+                if effective_intervals is not None
+                else None
+            ),
             message=self._message,
             element_html=element_html,
             timeline=result.timeline,
@@ -165,15 +170,14 @@ class AssertionMixin:
         if driver is None:
             return
 
-        path = Path(self._config.screenshot_path or "./screenshots/")
-        path.mkdir(parents=True, exist_ok=True)
-
         safe_name = re.sub(r"[^\w\-.]", "_", condition_name)[:80]
         timestamp = datetime.now(tz=UTC).strftime("%Y%m%d_%H%M%S")
         filename = f"screenshot_{timestamp}_{safe_name}.png"
-        filepath = path / filename
 
         try:
+            path = Path(self._config.screenshot_path or "./screenshots/")
+            path.mkdir(parents=True, exist_ok=True)
+            filepath = path / filename
             driver.save_screenshot(str(filepath))
             _logger.debug("Screenshot saved to %s", filepath)
         except Exception as exc:

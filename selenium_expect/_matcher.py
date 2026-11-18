@@ -6,6 +6,7 @@ the retry loop and negation via ``__getattr__`` on ``AssertionMixin``.
 
 from __future__ import annotations
 
+import contextlib
 from collections.abc import Callable
 from types import ModuleType
 from typing import Any, ClassVar
@@ -84,7 +85,10 @@ def extend(name: str) -> Callable[[_MatcherFn], _MatcherFn]:
 
     def decorator(fn: Callable[..., tuple[bool, Any]]) -> Callable[..., tuple[bool, Any]]:
         CustomMatcherRegistry.register(name, fn)
-        fn._selenium_expect_matcher = name  # type: ignore[attr-defined]
+        # Builtins and __slots__ callables can't carry attributes; they still
+        # work via the registry but can't be re-discovered by merge_from().
+        with contextlib.suppress(AttributeError):
+            fn._selenium_expect_matcher = name  # type: ignore[attr-defined]
         return fn
 
     return decorator

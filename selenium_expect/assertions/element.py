@@ -5,6 +5,7 @@ from __future__ import annotations
 import re
 from typing import Any, Self
 
+from selenium.common.exceptions import StaleElementReferenceException
 from selenium.webdriver.remote.webelement import WebElement
 
 from selenium_expect._config import ExpectConfig
@@ -203,15 +204,18 @@ class ExpectElement(AssertionMixin):
         timeout: float | None = None,
         polling: float | list[float] | None = None,
     ) -> Self:
-        """Assert element doesn't exist (raises StaleElementReferenceException
-        or NoSuchElementException)."""
+        """Assert element doesn't exist (raises StaleElementReferenceException).
+
+        Only a stale reference counts as "absent"; unexpected driver errors
+        (e.g. a crashed session) propagate instead of passing the assertion.
+        """
         el = self._target
 
         def condition() -> tuple[bool, Any]:
             try:
                 el.tag_name  # noqa: B018
                 return (False, "present")
-            except Exception:
+            except StaleElementReferenceException:
                 return (True, "absent")
 
         self._run_assertion(
@@ -257,14 +261,18 @@ class ExpectElement(AssertionMixin):
         timeout: float | None = None,
         polling: float | list[float] | None = None,
     ) -> Self:
-        """Assert element is stale (any access raises StaleElementReferenceException)."""
+        """Assert element is stale (any access raises StaleElementReferenceException).
+
+        Only a stale reference counts as "stale"; unexpected driver errors
+        (e.g. a crashed session) propagate instead of passing the assertion.
+        """
         el = self._target
 
         def condition() -> tuple[bool, Any]:
             try:
                 el.tag_name  # noqa: B018
                 return (False, "not stale")
-            except Exception:
+            except StaleElementReferenceException:
                 return (True, "stale")
 
         self._run_assertion(

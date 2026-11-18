@@ -98,12 +98,20 @@ class Expect:
         if locator is not None:
             if by is not None or value is not None:
                 raise ValueError("Cannot use both 'locator' and 'by/value' arguments")
+            if (
+                isinstance(locator, str)
+                or not isinstance(locator, (tuple, list))
+                or len(locator) != 2
+            ):
+                raise TypeError("locator must be a (by, value) pair, e.g. (By.ID, 'foo')")
             by, value = locator
 
         if (by is not None) != (value is not None):
             raise ValueError("Must provide both 'by' and 'value', or neither")
 
         if by is not None and value is not None:
+            if not isinstance(by, str) or not isinstance(value, str):
+                raise TypeError(f"'by' and 'value' must be str, got {by!r} and {value!r}")
             from selenium_expect._locator import LocatorExpect
 
             if not isinstance(target, WebDriver):
@@ -139,6 +147,7 @@ class Expect:
         *,
         timeout: float | None = None,
         polling: float | list[float] | None = None,
+        soft: bool | None = None,
         config: ExpectConfig | None = None,
     ) -> PollAssertion:
         """Create a ``PollAssertion`` for retry-based assertions on *fn*.
@@ -148,7 +157,7 @@ class Expect:
             expect.poll(lambda: driver.execute_script("return document.readyState"))
                 .to_equal("complete")
         """
-        return PollAssertion(fn, timeout=timeout, polling=polling, config=config)
+        return PollAssertion(fn, timeout=timeout, polling=polling, soft=soft, config=config)
 
     def configure(self, **defaults: Any) -> Callable[..., AssertionMixin]:
         """Create a pre-configured expect variant.
@@ -175,7 +184,7 @@ class Expect:
             /,
             **overrides: Any,
         ) -> PollAssertion:
-            poll_keys = ("timeout", "polling", "config")
+            poll_keys = ("timeout", "polling", "soft", "config")
             merged = {
                 **{k: v for k, v in defaults.items() if k in poll_keys},
                 **overrides,

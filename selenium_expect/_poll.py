@@ -22,6 +22,13 @@ from selenium_expect._errors import AssertionFormatter
 from selenium_expect._retry import retry_until
 
 
+def _polling_description(interval: float, intervals: Any) -> str | None:
+    """Describe the polling strategy for error messages when a schedule is used."""
+    if intervals is not None:
+        return f"backoff schedule {list(intervals)}"
+    return None
+
+
 class PollAssertion:
     """Assertion over an arbitrary function with retry loop."""
 
@@ -30,10 +37,13 @@ class PollAssertion:
         fn: Callable[[], Any],
         timeout: float | None = None,
         polling: float | list[float] | None = None,
+        soft: bool | None = None,
         config: ExpectConfig | None = None,
     ) -> None:
         self._fn = fn
         self._config = config if config is not None else get_config()
+        if soft is not None:
+            self._config = self._config.replace(soft_mode=soft)
         self._timeout = _normalize_timeout(timeout) if timeout is not None else self._config.timeout
         if self._timeout < 0:
             raise ValueError(f"timeout must be >= 0, got {self._timeout}")
@@ -79,6 +89,9 @@ class PollAssertion:
             elapsed_ms=result.elapsed_ms,
             poll_count=result.poll_count,
             polling_interval=self._polling_interval,
+            polling_description=_polling_description(
+                self._polling_interval, self._polling_intervals
+            ),
             timeline=result.timeline,
         )
         if self._config.soft_mode:
@@ -229,6 +242,7 @@ def poll(
     *,
     timeout: float | None = None,
     polling: float | list[float] | None = None,
+    soft: bool | None = None,
     config: ExpectConfig | None = None,
 ) -> PollAssertion:
     """Create a ``PollAssertion`` for retry-based assertions on *fn*.
@@ -238,4 +252,4 @@ def poll(
         poll(lambda: driver.execute_script("return document.readyState"))
             .to_equal("complete")
     """
-    return PollAssertion(fn, timeout=timeout, polling=polling, config=config)
+    return PollAssertion(fn, timeout=timeout, polling=polling, soft=soft, config=config)

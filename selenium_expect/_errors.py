@@ -17,6 +17,7 @@ class AssertionFormatter:
         elapsed_ms: int,
         poll_count: int,
         polling_interval: float,
+        polling_description: str | None = None,
         message: str | None = None,
         element_html: str | None = None,
         timeline: list[dict[str, Any]] | None = None,
@@ -29,6 +30,8 @@ class AssertionFormatter:
               Actual:   {actual}
               Element:  {truncated_html}     # if element_html provided
               Waited:   {elapsed_ms}ms ({poll_count} polls at {polling_interval}s interval)
+                        # or "({poll_count} polls, {polling_description})" when
+                        # a backoff schedule is in use
               Message:  {custom_message}     # if message provided
               Timeline: [poll N: actual, ...] # last 5 polls if timeline provided
         """
@@ -42,9 +45,12 @@ class AssertionFormatter:
             truncated = element_html if len(element_html) <= 200 else element_html[:200] + "..."
             lines.append(f"  Element:  {truncated}")
 
-        lines.append(
-            f"  Waited:   {elapsed_ms}ms ({poll_count} polls at {polling_interval}s interval)"
-        )
+        if polling_description is not None:
+            lines.append(f"  Waited:   {elapsed_ms}ms ({poll_count} polls, {polling_description})")
+        else:
+            lines.append(
+                f"  Waited:   {elapsed_ms}ms ({poll_count} polls at {polling_interval}s interval)"
+            )
 
         if message is not None:
             lines.append(f"  Message:  {message}")

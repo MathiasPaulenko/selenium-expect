@@ -19,46 +19,45 @@ class SoftAssertionCollector:
 
     Failures are stored per execution context (``ContextVar``): each
     thread and each async task has its own list.
+
+    The context variable holds an immutable tuple, so a child task that
+    inherits its parent's context gets a snapshot: failures added inside
+    the child (or the parent) never leak into the other context.
     """
 
-    _failures: ClassVar[ContextVar[list[str] | None]] = ContextVar(
-        "soft_assertion_failures", default=None
+    _failures: ClassVar[ContextVar[tuple[str, ...]]] = ContextVar(
+        "soft_assertion_failures", default=()
     )
 
     @classmethod
-    def _current(cls) -> list[str]:
-        """Return this context's failure list, creating it on first use."""
-        failures = cls._failures.get()
-        if failures is None:
-            failures = []
-            cls._failures.set(failures)
-        return failures
+    def _current(cls) -> tuple[str, ...]:
+        """Return this context's failures (immutable snapshot)."""
+        return cls._failures.get()
 
     @classmethod
     def add_failure(cls, message: str) -> None:
-        """Record a soft assertion failure."""
-        cls._current().append(message)
+        """Record a soft assertion failure in the current context."""
+        cls._failures.set((*cls._failures.get(), message))
 
     @classmethod
     def get_failures(cls) -> list[str]:
         """Return all collected failures in this context."""
-        return list(cls._current())
+        return list(cls._failures.get())
 
     @classmethod
     def reset(cls) -> None:
         """Clear all collected failures in this context."""
-        cls._failures.set([])
+        cls._failures.set(())
 
     @classmethod
     def assert_all(cls) -> None:
         """Raise ``AssertionError`` if any failures were collected, then reset."""
-        failures = cls._current()
+        failures = cls._failures.get()
         if not failures:
             return
-        messages = list(failures)
         cls.reset()
-        combined = "\n---\n".join(messages)
-        raise AssertionError(f"Soft assertion failures ({len(messages)}):\n{combined}")
+        combined = "\n---\n".join(failures)
+        raise AssertionError(f"Soft assertion failures ({len(failures)}):\n{combined}")
 
 
 def assert_all() -> None:

@@ -119,14 +119,17 @@ class ExpectIframe(AssertionMixin):
         driver = self._target
 
         def condition() -> tuple[bool, Any]:
+            entered = False
             try:
                 driver.switch_to.frame(frame_id)
+                entered = True
                 source = driver.page_source or ""
                 return (text in source, source[:200])
             except NoSuchFrameException:
                 return (False, "frame not available")
             finally:
-                driver.switch_to.parent_frame()
+                if entered:
+                    driver.switch_to.parent_frame()
 
         self._run_assertion(
             condition=condition,
